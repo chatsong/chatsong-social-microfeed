@@ -349,6 +349,17 @@
     .share-toast.visible {
       transform: translateX(-50%) translateY(0);
     }
+
+    /* Deep-link highlight */
+    @keyframes trackHighlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.55); }
+      100% { box-shadow: 0 0 0 14px rgba(99, 102, 241, 0); }
+    }
+
+    .track-highlight {
+      animation: trackHighlightPulse 1.4s ease-out 2;
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -356,7 +367,7 @@
   <div class="container">
     <!-- Share Form -->
     <div class="form-card">
-      <h2 style="margin-top:0">Share a track as fan</h2>
+      <h2 style="margin-top:0">Share a track</h2>
       <form id="trackForm">
         <div class="form-group">
           <label>Artist</label>
@@ -392,10 +403,14 @@
 
   <script>
     // YOUR GOOGLE APPS SCRIPT WEB APP URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxeFEwlFQ45w4N_NUZum10koCN5PvaxY3xVMYdfnPX2NRuAlzhFX-vRbFP-eO_c-vWhCg/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzcR2icANOkdKiEgEefnC9xAzcpjIuo9hZLMEecCC1a76NaPMO4Ja5PmMkUZ_gB0qbQFg/exec';
 
     // MODERATOR PASSWORD FOR DELETING TRACKS (Change this to whatever you want!)
     const MODERATOR_PIN = '1234';
+
+    // The forum page where this microfeed is embedded - share links point back here (with a
+    // ?track= deep link) instead of straight to the external music platform.
+    const SITE_URL = 'https://community.chatsong.nl/blog';
 
     // 1. UNIVERSAL EMBED PLAYER
     function getUniversalEmbedUrl(rawUrl) {
@@ -476,12 +491,13 @@
       }
     }
 
-    function shareToPlatform(platform, artist, title, url) {
-      const text = encodeURIComponent(`Listen to "${title}" by ${artist} on Chatsong!`);
-      const link = encodeURIComponent(url);
+    function shareToPlatform(platform, artist, title, trackId) {
+      const deepLink = `${SITE_URL}?track=${encodeURIComponent(trackId)}`;
+      const text = encodeURIComponent(`Listen to "${title}" by ${artist} — shared on community.chatsong.nl`);
+      const link = encodeURIComponent(deepLink);
 
       if (platform === 'native') {
-        shareTrack(artist, title, url);
+        shareTrack(artist, title, deepLink);
       } else if (platform === 'whatsapp') {
         window.open(`https://api.whatsapp.com/send?text=${text}%20${link}`, '_blank');
       } else if (platform === 'twitter') {
@@ -535,14 +551,14 @@
             ${renderPlayer(post.url)}
 
             <div class="action-bar">
-              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                 Share
               </button>
-              <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+              <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
                 WhatsApp
               </button>
-              <button class="action-btn x" onclick="shareToPlatform('twitter', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+              <button class="action-btn x" onclick="shareToPlatform('twitter', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
                 X
               </button>
             </div>
@@ -568,6 +584,21 @@
       } catch (err) {
         feedContainer.innerHTML = `<p style="color:red">Could not connect to backend.</p>`;
       }
+    }
+
+    // Scrolls to and briefly highlights a track when the page is opened via a shared
+    // ?track=<id> deep link (e.g. from a WhatsApp or X share).
+    function scrollToSharedTrack() {
+      const params = new URLSearchParams(window.location.search);
+      const trackId = params.get('track');
+      if (!trackId) return;
+
+      const el = document.getElementById(`track-${trackId}`);
+      if (!el) return;
+
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('track-highlight');
+      setTimeout(() => el.classList.remove('track-highlight'), 2800);
     }
 
     // 4. COMMENTS LOGIC
@@ -785,7 +816,7 @@
     }
 
     // Initialize feed
-    loadFeed();
+    loadFeed().then(scrollToSharedTrack);
   </script>
 </body>
 </html>
