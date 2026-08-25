@@ -1,0 +1,1565 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chatsong MicroFeed — Discover New Music</title>
+
+<meta name="description"
+      content="Discover independent artists, share your favorite tracks and connect with the Chatsong music community.">
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f6f8;
+  color: #171717;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: min(100% - 30px, 900px);
+  margin: auto;
+}
+
+/* HEADER */
+
+.header {
+  background: #111;
+  color: white;
+  padding: 22px 0;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.logo span {
+  color: #aaa;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-light {
+  background: white;
+  color: #111;
+}
+
+.btn-dark {
+  background: #222;
+  color: white;
+}
+
+/* HERO */
+
+.hero {
+  background: white;
+  border-bottom: 1px solid #ddd;
+  padding: 35px 0;
+}
+
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 5vw, 42px);
+}
+
+.hero p {
+  max-width: 680px;
+  color: #555;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.btn-primary {
+  background: #111;
+  color: white;
+}
+
+.btn-outline {
+  border: 1px solid #bbb;
+  background: white;
+  color: #111;
+}
+
+/* SHARE */
+
+.share-box {
+  background: white;
+  margin: 25px 0;
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+}
+
+.share-box h2 {
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.share-submit {
+  background: #111;
+  color: white;
+}
+
+/* FEED */
+
+.feed-title {
+  margin: 35px 0 15px;
+}
+
+.loading {
+  padding: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  background: #fff0f0;
+  border: 1px solid #e5bcbc;
+  color: #9b2226;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+/* POST */
+
+.post {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.post-content {
+  padding: 20px;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.artist {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.title {
+  color: #555;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 12px;
+  background: #eee;
+  padding: 5px 8px;
+  border-radius: 20px;
+  height: fit-content;
+}
+
+.date {
+  color: #999;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* EMBED */
+
+.embed {
+  margin-top: 18px;
+  width: 100%;
+}
+
+.embed iframe {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+}
+
+.external-link {
+  display: block;
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* COMMENTS */
+
+.comments {
+  border-top: 1px solid #eee;
+  padding: 18px 20px;
+  background: #fafafa;
+}
+
+.comments h3 {
+  margin-top: 0;
+}
+
+.comment {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.comment:last-child {
+  border-bottom: 0;
+}
+
+.comment-name {
+  font-weight: 700;
+}
+
+.comment-text {
+  margin-top: 4px;
+  color: #444;
+}
+
+.comment-date {
+  font-size: 11px;
+  color: #999;
+}
+
+.comment-form {
+  margin-top: 15px;
+}
+
+.comment-form button {
+  margin-top: 8px;
+  background: #111;
+  color: white;
+}
+
+/* DISCOVERY */
+
+.discovery {
+  background: #111;
+  color: white;
+  border-radius: 15px;
+  padding: 28px;
+  margin: 30px 0;
+}
+
+.discovery h2 {
+  margin-top: 0;
+}
+
+.discovery p {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.discovery-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.discovery .btn-light {
+  background: white;
+  color: #111;
+}
+
+.discovery .btn-dark {
+  border: 1px solid #555;
+}
+
+/* FOOTER */
+
+footer {
+  margin-top: 40px;
+  padding: 30px 0;
+  border-top: 1px solid #ddd;
+  color: #777;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+  .container {
+    width: min(100% - 20px, 900px);
+  }
+
+  .header-inner {
+    align-items: flex-start;
+  }
+
+  .header-buttons {
+    flex-direction: column;
+  }
+
+  .header-buttons .btn {
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+
+  .share-box,
+  .post-content {
+    padding: 16px;
+  }
+
+  .post-header {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .tag {
+    width: fit-content;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ==================================================
+     CONFIGURATION
+================================================== -->
+
+<script>
+
+const CONFIG = {
+
+  /*
+   * PLAK HIER JE GOOGLE APPS SCRIPT WEB APP URL
+   *
+   * Bijvoorbeeld:
+   * https://script.google.com/macros/s/XXXXXXXX/exec
+   */
+  API_URL:
+    "https://script.google.com/macros/s/AKfycbzQON1FFjyfbHwpWloJUxbDA5-OoeU0FurZXw7UGxr7jSdUD3SI82hzVq6WL8TBjvPuOw/exec",
+
+
+  /*
+   * JOUW CHATSONG COMMUNITY
+   */
+  CHATSONG_URL:
+    "https://community.chatsong.nl"
+
+};
+
+</script>
+
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<header class="header">
+
+  <div class="container header-inner">
+
+    <div class="logo">
+      Chatsong <span>MicroFeed</span>
+    </div>
+
+    <div class="header-buttons">
+
+      <a
+        class="btn btn-light"
+        id="headerDiscover"
+        target="_blank">
+        Discover Chatsong
+      </a>
+
+      <a
+        class="btn btn-dark"
+        id="headerJoin"
+        target="_blank">
+        Join Chatsong
+      </a>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- ==================================================
+     HERO
+================================================== -->
+
+<section class="hero">
+
+  <div class="container">
+
+    <h1>
+      Discover music you haven't heard yet.
+    </h1>
+
+    <p>
+      Found an amazing track by an independent or unknown artist?
+      Drop it here and share it with other music lovers.
+      No membership required.
+    </p>
+
+    <div class="hero-buttons">
+
+      <a
+        class="btn btn-primary"
+        href="#share">
+        Share a track
+      </a>
+
+      <a
+        class="btn btn-outline"
+        id="heroDiscover"
+        target="_blank">
+        Discover Chatsong
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<main class="container">
+
+
+<!-- ==================================================
+     SHARE TRACK
+================================================== -->
+
+<section class="share-box" id="share">
+
+  <h2>🎵 Share a track</h2>
+
+  <p>
+    Know a great artist that deserves more listeners?
+    Share their music with us.
+  </p>
+
+  <form id="postForm">
+
+    <div class="form-group">
+
+      <label for="artist">
+        Artist
+      </label>
+
+      <input
+        id="artist"
+        required
+        placeholder="Artist name">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="title">
+        Track title
+      </label>
+
+      <input
+        id="title"
+        required
+        placeholder="Song title">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="url">
+        Music link
+      </label>
+
+      <input
+        id="url"
+        type="url"
+        required
+        placeholder="YouTube, Spotify, SoundCloud, Bandcamp or Apple Music link">
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="tag">
+        Tag
+      </label>
+
+      <select id="tag">
+
+        <option value="">
+          Select a tag
+        </option>
+
+        <option value="Indie">
+          Indie
+        </option>
+
+        <option value="Rock">
+          Rock
+        </option>
+
+        <option value="Pop">
+          Pop
+        </option>
+
+        <option value="Electronic">
+          Electronic
+        </option>
+
+        <option value="Hip-Hop">
+          Hip-Hop
+        </option>
+
+        <option value="Metal">
+          Metal
+        </option>
+
+        <option value="Alternative">
+          Alternative
+        </option>
+
+        <option value="Other">
+          Other
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <button
+      class="btn share-submit"
+      type="submit">
+
+      Share track
+
+    </button>
+
+  </form>
+
+  <div id="postMessage"></div>
+
+</section>
+
+
+<!-- ==================================================
+     DISCOVERY CTA
+================================================== -->
+
+<section class="discovery">
+
+  <h2>
+    🎶 Want to discover even more?
+  </h2>
+
+  <p>
+    Chatsong is a music community where independent artists
+    and music lovers can discover each other, share music
+    and join the conversation.
+  </p>
+
+  <div class="discovery-buttons">
+
+    <a
+      class="btn btn-light"
+      id="discoverButton"
+      target="_blank">
+
+      Discover Chatsong →
+
+    </a>
+
+    <a
+      class="btn btn-dark"
+      id="joinButton"
+      target="_blank">
+
+      Become a member
+
+    </a>
+
+  </div>
+
+</section>
+
+
+<!-- ==================================================
+     FEED
+================================================== -->
+
+<h2 class="feed-title">
+  Latest discoveries
+</h2>
+
+<div id="feed">
+
+  <div class="loading">
+    Loading music...
+  </div>
+
+</div>
+
+
+</main>
+
+
+<footer>
+
+  Chatsong MicroFeed · Discover independent music
+
+</footer>
+
+
+<script>
+
+/* ==================================================
+   LINKS
+================================================== */
+
+document.getElementById("headerDiscover").href =
+  CONFIG.CHATSONG_URL;
+
+document.getElementById("headerJoin").href =
+  CONFIG.CHATSONG_URL;
+
+document.getElementById("heroDiscover").href =
+  CONFIG.CHATSONG_URL;
+
+document.getElementById("discoverButton").href =
+  CONFIG.CHATSONG_URL;
+
+document.getElementById("joinButton").href =
+  CONFIG.CHATSONG_URL;
+
+
+/* ==================================================
+   LOAD FEED
+================================================== */
+
+async function loadFeed() {
+
+  const feed =
+    document.getElementById("feed");
+
+  if (
+    CONFIG.API_URL.includes("PASTE-")
+  ) {
+
+    feed.innerHTML = `
+      <div class="error">
+        Google Apps Script URL has not been added yet.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        CONFIG.API_URL +
+        "?action=posts"
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Network response failed"
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not load feed"
+      );
+
+    }
+
+
+    renderFeed(data.posts || []);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    feed.innerHTML = `
+      <div class="error">
+        Could not load the MicroFeed.
+        Please try again later.
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* ==================================================
+   RENDER FEED
+================================================== */
+
+function renderFeed(posts) {
+
+  const feed =
+    document.getElementById("feed");
+
+
+  if (!posts.length) {
+
+    feed.innerHTML = `
+      <div class="share-box">
+        No tracks have been shared yet.
+        Be the first to discover something!
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  feed.innerHTML =
+    posts.map(renderPost).join("");
+
+}
+
+
+/* ==================================================
+   RENDER POST
+================================================== */
+
+function renderPost(post) {
+
+  return `
+
+    <article
+      class="post"
+      data-id="${escapeHtml(post.id)}">
+
+      <div class="post-content">
+
+        <div class="post-header">
+
+          <div>
+
+            <div class="artist">
+              ${escapeHtml(post.artist)}
+            </div>
+
+            <div class="title">
+              ${escapeHtml(post.title)}
+            </div>
+
+          </div>
+
+          ${
+            post.tag
+            ? `
+              <div class="tag">
+                ${escapeHtml(post.tag)}
+              </div>
+            `
+            : ""
+          }
+
+        </div>
+
+
+        ${
+          post.created
+          ? `
+            <div class="date">
+              ${formatDate(post.created)}
+            </div>
+          `
+          : ""
+        }
+
+
+        <div class="embed">
+
+          ${createEmbed(post.url)}
+
+        </div>
+
+
+        <div class="discovery" style="margin:20px 0 0;">
+
+          <strong>
+            Discover this artist on Chatsong
+          </strong>
+
+          <p style="margin-bottom:12px;">
+            Find independent artists, discover more
+            music and join the conversation.
+          </p>
+
+          <a
+            class="btn btn-light"
+            href="${CONFIG.CHATSONG_URL}"
+            target="_blank">
+
+            Discover Chatsong →
+
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="comments">
+
+        <h3>
+          Comments
+        </h3>
+
+        <div
+          id="comments-${escapeHtml(post.id)}">
+
+          Loading comments...
+
+        </div>
+
+
+        <form
+          class="comment-form"
+          onsubmit="submitComment(event, '${escapeJs(post.id)}')">
+
+          <input
+            name="name"
+            placeholder="Your name or nickname"
+            required>
+
+          <textarea
+            name="comment"
+            placeholder="Leave a comment..."
+            required></textarea>
+
+          <button
+            class="btn"
+            type="submit">
+
+            Comment
+
+          </button>
+
+        </form>
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* ==================================================
+   EMBED DETECTION
+================================================== */
+
+function createEmbed(url) {
+
+  if (!url) {
+    return "";
+  }
+
+
+  const safeUrl =
+    escapeHtml(url);
+
+
+  /*
+   * YOUTUBE
+   */
+
+  const youtube =
+    url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?/]+)/
+    );
+
+
+  if (youtube) {
+
+    return `
+      <iframe
+        height="315"
+        src="https://www.youtube.com/embed/${encodeURIComponent(youtube[1])}"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    `;
+
+  }
+
+
+  /*
+   * SPOTIFY
+   */
+
+  if (
+    url.includes("open.spotify.com")
+  ) {
+
+    const spotify =
+      url.match(
+        /open\.spotify\.com\/(track|album|playlist|episode)\/([^?]+)/
+      );
+
+
+    if (spotify) {
+
+      return `
+        <iframe
+          src="https://open.spotify.com/embed/${spotify[1]}/${spotify[2]}"
+          height="152"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy">
+        </iframe>
+      `;
+
+    }
+
+  }
+
+
+  /*
+   * SOUNDCLOUD
+   */
+
+  if (
+    url.includes("soundcloud.com")
+  ) {
+
+    return `
+      <iframe
+        height="166"
+        scrolling="no"
+        allow="autoplay"
+        loading="lazy"
+        src="https://w.soundcloud.com/player/api.html?url=${encodeURIComponent(url)}">
+      </iframe>
+    `;
+
+  }
+
+
+  /*
+   * BANDCAMP
+   *
+   * Bandcamp often requires its own embed
+   * information, so we provide a direct link
+   * rather than generating a potentially broken
+   * iframe.
+   */
+
+  if (
+    url.includes("bandcamp.com")
+  ) {
+
+    return `
+      <a
+        class="external-link"
+        href="${safeUrl}"
+        target="_blank"
+        rel="noopener">
+
+        🎵 Listen on Bandcamp →
+
+      </a>
+    `;
+
+  }
+
+
+  /*
+   * APPLE MUSIC
+   */
+
+  if (
+    url.includes("music.apple.com")
+  ) {
+
+    return `
+      <a
+        class="external-link"
+        href="${safeUrl}"
+        target="_blank"
+        rel="noopener">
+
+        🎵 Listen on Apple Music →
+
+      </a>
+    `;
+
+  }
+
+
+  /*
+   * FALLBACK
+   */
+
+  return `
+    <a
+      class="external-link"
+      href="${safeUrl}"
+      target="_blank"
+      rel="noopener">
+
+      🎵 Open this track →
+
+    </a>
+  `;
+
+}
+
+
+/* ==================================================
+   LOAD COMMENTS
+================================================== */
+
+async function loadComments(trackId) {
+
+  const box =
+    document.getElementById(
+      "comments-" + trackId
+    );
+
+
+  if (!box) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        CONFIG.API_URL +
+        "?action=comments&trackId=" +
+        encodeURIComponent(trackId)
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Comments could not be loaded"
+      );
+
+    }
+
+
+    renderComments(
+      trackId,
+      data.comments || []
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    box.innerHTML =
+      `<small>Comments could not be loaded.</small>`;
+
+  }
+
+}
+
+
+/* ==================================================
+   RENDER COMMENTS
+================================================== */
+
+function renderComments(
+  trackId,
+  comments
+) {
+
+  const box =
+    document.getElementById(
+      "comments-" + trackId
+    );
+
+
+  if (!comments.length) {
+
+    box.innerHTML =
+      `<small>No comments yet. Be the first!</small>`;
+
+    return;
+
+  }
+
+
+  box.innerHTML =
+    comments.map(comment => `
+
+      <div class="comment">
+
+        <div class="comment-name">
+          ${escapeHtml(comment.name)}
+        </div>
+
+        <div class="comment-text">
+          ${escapeHtml(comment.comment)}
+        </div>
+
+        <div class="comment-date">
+          ${formatDate(comment.create)}
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* ==================================================
+   SUBMIT COMMENT
+================================================== */
+
+async function submitComment(
+  event,
+  trackId
+) {
+
+  event.preventDefault();
+
+
+  const form =
+    event.target;
+
+
+  const name =
+    form.name.value.trim();
+
+
+  const comment =
+    form.comment.value.trim();
+
+
+  if (!name || !comment) {
+    return;
+  }
+
+
+  const button =
+    form.querySelector("button");
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Posting...";
+
+
+  try {
+
+    const response =
+      await fetch(
+        CONFIG.API_URL,
+        {
+          method: "POST",
+
+          body: JSON.stringify({
+
+            action:
+              "createComment",
+
+            "track id":
+              trackId,
+
+            name:
+              name,
+
+            comment:
+              comment
+
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Comment could not be posted"
+      );
+
+    }
+
+
+    form.reset();
+
+
+    await loadComments(trackId);
+
+
+  } catch (error) {
+
+    alert(
+      "Could not post comment: " +
+      error.message
+    );
+
+  }
+
+
+  button.disabled = false;
+
+  button.textContent =
+    "Comment";
+
+}
+
+
+/* ==================================================
+   DATE
+================================================== */
+
+function formatDate(value) {
+
+  if (!value) {
+    return "";
+  }
+
+
+  const date =
+    new Date(value);
+
+
+  if (
+    isNaN(date.getTime())
+  ) {
+
+    return value;
+
+  }
+
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }
+  );
+
+}
+
+
+/* ==================================================
+   SECURITY
+================================================== */
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeJs(value) {
+
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'");
+
+}
+
+
+/* ==================================================
+   SHARE TRACK
+================================================== */
+
+document
+  .getElementById("postForm")
+  .addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+
+      const button =
+        this.querySelector(
+          "button"
+        );
+
+
+      const message =
+        document.getElementById(
+          "postMessage"
+        );
+
+
+      const artist =
+        document
+          .getElementById("artist")
+          .value
+          .trim();
+
+
+      const title =
+        document
+          .getElementById("title")
+          .value
+          .trim();
+
+
+      const url =
+        document
+          .getElementById("url")
+          .value
+          .trim();
+
+
+      const tag =
+        document
+          .getElementById("tag")
+          .value;
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Sharing...";
+
+
+      try {
+
+        const response =
+          await fetch(
+            CONFIG.API_URL,
+            {
+
+              method: "POST",
+
+              body:
+                JSON.stringify({
+
+                  action:
+                    "createPost",
+
+                  artist:
+                    artist,
+
+                  title:
+                    title,
+
+                  url:
+                    url,
+
+                  tag:
+                    tag
+
+                })
+
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !data.success
+        ) {
+
+          throw new Error(
+            data.error ||
+            "Could not share track"
+          );
+
+        }
+
+
+        message.innerHTML = `
+          <p>
+            🎵 Track shared successfully!
+          </p>
+        `;
+
+
+        this.reset();
+
+
+        await loadFeed();
+
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+
+      } catch (error) {
+
+        message.innerHTML = `
+          <div class="error">
+            Could not share track:
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+
+      }
+
+
+      button.disabled = false;
+
+      button.textContent =
+        "Share track";
+
+    }
+  );
+
+
+/* ==================================================
+   LOAD COMMENTS AFTER POSTS ARE RENDERED
+================================================== */
+
+const originalRenderFeed =
+  renderFeed;
+
+
+/*
+ * Kleine wrapper zodat comments
+ * na het laden van de feed automatisch
+ * worden opgehaald.
+ */
+
+renderFeed = function(posts) {
+
+  originalRenderFeed(posts);
+
+
+  posts.forEach(post => {
+
+    loadComments(post.id);
+
+  });
+
+};
+
+
+/* ==================================================
+   START
+================================================== */
+
+loadFeed();
+
+</script>
+
+</body>
+</html>
+```
