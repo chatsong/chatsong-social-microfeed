@@ -70,6 +70,16 @@
       border-color: var(--accent);
     }
 
+    .autofill-hint {
+      font-size: 12px;
+      margin: -6px 0 12px 0;
+      min-height: 16px;
+      color: var(--text-muted);
+    }
+
+    .autofill-hint.found { color: var(--success); }
+    .autofill-hint.error { color: var(--text-muted); }
+
     .btn-submit {
       background: var(--accent);
       color: white;
@@ -370,16 +380,17 @@
       <h2 style="margin-top:0">Share a track</h2>
       <form id="trackForm">
         <div class="form-group">
+          <label>Music link (Spotify, SoundCloud, YouTube, Apple Music)</label>
+          <input type="url" id="url" class="form-control" required placeholder="https://...">
+        </div>
+        <p class="autofill-hint" id="autofillHint"></p>
+        <div class="form-group">
           <label>Artist</label>
           <input type="text" id="artist" class="form-control" required placeholder="e.g. ChatsongMusic">
         </div>
         <div class="form-group">
           <label>Track title</label>
           <input type="text" id="title" class="form-control" required placeholder="e.g. Hope & Desire">
-        </div>
-        <div class="form-group">
-          <label>Music link (Spotify, SoundCloud, YouTube, Apple Music)</label>
-          <input type="url" id="url" class="form-control" required placeholder="https://...">
         </div>
         <div class="form-group">
           <label>Genre / Tag</label>
@@ -465,6 +476,62 @@
         </div>
       `;
     }
+
+    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK
+    // Uses noembed.com (no API key needed) to look up metadata so fans only have to paste a
+    // link. Artist/title fields stay editable in case the lookup is wrong or unsupported.
+    let autofillRequestId = 0;
+
+    async function autofillFromUrl() {
+      const urlInput = document.getElementById('url');
+      const artistInput = document.getElementById('artist');
+      const titleInput = document.getElementById('title');
+      const hint = document.getElementById('autofillHint');
+      const rawUrl = urlInput.value.trim();
+
+      if (!rawUrl) {
+        hint.textContent = '';
+        hint.className = 'autofill-hint';
+        return;
+      }
+
+      const requestId = ++autofillRequestId;
+      hint.textContent = 'Looking up track details…';
+      hint.className = 'autofill-hint';
+
+      try {
+        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`);
+        const data = await res.json();
+
+        if (requestId !== autofillRequestId) return; // a newer paste happened while this was loading
+
+        if (data.error) {
+          hint.textContent = "Couldn't auto-fill details — fill in artist and title yourself.";
+          hint.className = 'autofill-hint error';
+          return;
+        }
+
+        if (!artistInput.value.trim() && data.author_name) {
+          artistInput.value = data.author_name;
+        }
+        if (!titleInput.value.trim() && data.title) {
+          titleInput.value = data.title;
+        }
+
+        hint.textContent = 'Details found — feel free to edit before sharing.';
+        hint.className = 'autofill-hint found';
+      } catch (err) {
+        if (requestId !== autofillRequestId) return;
+        hint.textContent = "Couldn't auto-fill details — fill in artist and title yourself.";
+        hint.className = 'autofill-hint error';
+      }
+    }
+
+    document.getElementById('url').addEventListener('paste', () => {
+      // Wait a tick so the pasted value is actually in the input before reading it
+      setTimeout(autofillFromUrl, 50);
+    });
+    document.getElementById('url').addEventListener('blur', autofillFromUrl);
 
     // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
@@ -795,6 +862,9 @@
 
         if (data.success) {
           e.target.reset();
+          const hint = document.getElementById('autofillHint');
+          hint.textContent = '';
+          hint.className = 'autofill-hint';
           loadFeed();
         } else {
           alert('Error: ' + data.error);
