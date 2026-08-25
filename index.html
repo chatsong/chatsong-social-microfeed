@@ -421,32 +421,42 @@
 
     // The forum page where this microfeed is embedded
     const SITE_URL = 'https://community.chatsong.nl/blog';
-
-    // 1. UNIVERSAL EMBED PLAYER
+// 1. UNIVERSAL EMBED PLAYER (Spotify, YouTube, Shorts, SoundCloud, Apple Music)
     function getUniversalEmbedUrl(rawUrl) {
       if (!rawUrl) return null;
-      const url = rawUrl.trim().split('?')[0];
+      const url = rawUrl.trim();
 
+      // 1. Spotify
       if (url.includes('spotify.com')) {
-        return url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+        return url.split('?')[0].replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
 
+      // 2. YouTube (Regulier, Shorts, Mobiel, Music, Live & Embed)
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
+
         if (url.includes('youtu.be/')) {
-          videoId = url.split('youtu.be/')[1];
+          videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('/shorts/')) {
+          videoId = url.split('/shorts/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('/embed/')) {
+          videoId = url.split('/embed/')[1].split('?')[0].split('&')[0];
         } else if (url.includes('v=')) {
-          videoId = url.split('v=').slice(1).join('v=').split('&')[0];
+          videoId = url.split('v=')[1].split('&')[0];
         }
+
         return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
       }
 
+      // 3. Apple Music
       if (url.includes('music.apple.com')) {
-        return url.replace('music.apple.com', 'embed.music.apple.com');
+        return url.split('?')[0].replace('music.apple.com', 'embed.music.apple.com');
       }
 
+      // 4. SoundCloud
       if (url.includes('soundcloud.com')) {
-        return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+        const cleanUrl = url.split('?')[0];
+        return `https://w.soundcloud.com/player/?url=${encodeURIComponent(cleanUrl)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
       }
 
       return null;
@@ -462,7 +472,7 @@
 
         return `
           <div class="player-container">
-            <iframe src="${embedUrl}" width="100%" height="${height}" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write"></iframe>
+            <iframe src="${embedUrl}" width="100%" height="${height}" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write" allowfullscreen></iframe>
           </div>
         `;
       }
@@ -476,7 +486,7 @@
       `;
     }
 
-    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK (Support voor Spotify, SoundCloud & YouTube)
+    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK (Spotify, YouTube, SoundCloud, etc.)
     let autofillRequestId = 0;
 
     async function autofillFromUrl() {
@@ -505,6 +515,7 @@
         } else if (rawUrl.includes('soundcloud.com')) {
           fetchUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`;
         } else {
+          // Gebruik noembed voor YouTube, Apple Music en overige platformen
           fetchUrl = `https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`;
         }
 
@@ -547,7 +558,7 @@
 
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
-
+  
     // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
       const shareData = {
