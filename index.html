@@ -1,1565 +1,450 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Chatsong MicroFeed — Discover New Music</title>
-
-<meta name="description"
-      content="Discover independent artists, share your favorite tracks and connect with the Chatsong music community.">
-
-<style>
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f5f6f8;
-  color: #171717;
-}
-
-a {
-  color: inherit;
-}
-
-.container {
-  width: min(100% - 30px, 900px);
-  margin: auto;
-}
-
-/* HEADER */
-
-.header {
-  background: #111;
-  color: white;
-  padding: 22px 0;
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.logo {
-  font-size: 25px;
-  font-weight: 800;
-}
-
-.logo span {
-  color: #aaa;
-}
-
-.header-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.btn {
-  border: 0;
-  border-radius: 8px;
-  padding: 11px 16px;
-  cursor: pointer;
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.btn-light {
-  background: white;
-  color: #111;
-}
-
-.btn-dark {
-  background: #222;
-  color: white;
-}
-
-/* HERO */
-
-.hero {
-  background: white;
-  border-bottom: 1px solid #ddd;
-  padding: 35px 0;
-}
-
-.hero h1 {
-  margin: 0 0 10px;
-  font-size: clamp(28px, 5vw, 42px);
-}
-
-.hero p {
-  max-width: 680px;
-  color: #555;
-  font-size: 17px;
-  line-height: 1.6;
-}
-
-.hero-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 22px;
-}
-
-.btn-primary {
-  background: #111;
-  color: white;
-}
-
-.btn-outline {
-  border: 1px solid #bbb;
-  background: white;
-  color: #111;
-}
-
-/* SHARE */
-
-.share-box {
-  background: white;
-  margin: 25px 0;
-  padding: 24px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-}
-
-.share-box h2 {
-  margin-top: 0;
-}
-
-.form-group {
-  margin-bottom: 14px;
-}
-
-label {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font: inherit;
-}
-
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.share-submit {
-  background: #111;
-  color: white;
-}
-
-/* FEED */
-
-.feed-title {
-  margin: 35px 0 15px;
-}
-
-.loading {
-  padding: 30px;
-  text-align: center;
-  color: #666;
-}
-
-.error {
-  background: #fff0f0;
-  border: 1px solid #e5bcbc;
-  color: #9b2226;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-/* POST */
-
-.post {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-
-.post-content {
-  padding: 20px;
-}
-
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-}
-
-.artist {
-  font-weight: 800;
-  font-size: 18px;
-}
-
-.title {
-  color: #555;
-  margin-top: 4px;
-}
-
-.tag {
-  font-size: 12px;
-  background: #eee;
-  padding: 5px 8px;
-  border-radius: 20px;
-  height: fit-content;
-}
-
-.date {
-  color: #999;
-  font-size: 12px;
-  margin-top: 10px;
-}
-
-/* EMBED */
-
-.embed {
-  margin-top: 18px;
-  width: 100%;
-}
-
-.embed iframe {
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-}
-
-.external-link {
-  display: block;
-  margin-top: 12px;
-  padding: 13px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 700;
-}
-
-/* COMMENTS */
-
-.comments {
-  border-top: 1px solid #eee;
-  padding: 18px 20px;
-  background: #fafafa;
-}
-
-.comments h3 {
-  margin-top: 0;
-}
-
-.comment {
-  border-bottom: 1px solid #eee;
-  padding: 10px 0;
-}
-
-.comment:last-child {
-  border-bottom: 0;
-}
-
-.comment-name {
-  font-weight: 700;
-}
-
-.comment-text {
-  margin-top: 4px;
-  color: #444;
-}
-
-.comment-date {
-  font-size: 11px;
-  color: #999;
-}
-
-.comment-form {
-  margin-top: 15px;
-}
-
-.comment-form button {
-  margin-top: 8px;
-  background: #111;
-  color: white;
-}
-
-/* DISCOVERY */
-
-.discovery {
-  background: #111;
-  color: white;
-  border-radius: 15px;
-  padding: 28px;
-  margin: 30px 0;
-}
-
-.discovery h2 {
-  margin-top: 0;
-}
-
-.discovery p {
-  color: #ccc;
-  line-height: 1.6;
-}
-
-.discovery-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.discovery .btn-light {
-  background: white;
-  color: #111;
-}
-
-.discovery .btn-dark {
-  border: 1px solid #555;
-}
-
-/* FOOTER */
-
-footer {
-  margin-top: 40px;
-  padding: 30px 0;
-  border-top: 1px solid #ddd;
-  color: #777;
-  text-align: center;
-  font-size: 13px;
-}
-
-/* MOBILE */
-
-@media (max-width: 600px) {
-
-  .container {
-    width: min(100% - 20px, 900px);
-  }
-
-  .header-inner {
-    align-items: flex-start;
-  }
-
-  .header-buttons {
-    flex-direction: column;
-  }
-
-  .header-buttons .btn {
-    padding: 8px 11px;
-    font-size: 12px;
-  }
-
-  .share-box,
-  .post-content {
-    padding: 16px;
-  }
-
-  .post-header {
-    flex-direction: column;
-    gap: 7px;
-  }
-
-  .tag {
-    width: fit-content;
-  }
-
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatsong Microfeed</title>
+  <style>
+    :root {
+      --bg-color: #09090b;
+      --card-bg: #18181b;
+      --border-color: #27272a;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* Formulier */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: #09090b;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .btn-submit {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Track Kaarten */
+    .track-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .track-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .artist-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .track-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 2px 0 0 0;
+    }
+
+    .tag-badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Embed Player Container */
+    .player-container {
+      margin: 14px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .player-container iframe {
+      display: block;
+      width: 100%;
+    }
+
+    .external-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: #27272a;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Deelknoppen */
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #27272a;
+      color: var(--text-main);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #3f3f46;
+    }
+
+    .action-btn.wa:hover { background: #059669; }
+    .action-btn.x:hover { background: #000; }
+
+    /* Toast melding op desktop */
+    .share-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: #f4f4f5;
+      color: #09090b;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 10000;
+    }
+
+    .share-toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- ==================================================
-     CONFIGURATION
-================================================== -->
-
-<script>
-
-const CONFIG = {
-
-  /*
-   * PLAK HIER JE GOOGLE APPS SCRIPT WEB APP URL
-   *
-   * Bijvoorbeeld:
-   * https://script.google.com/macros/s/XXXXXXXX/exec
-   */
-  API_URL:
-    "https://script.google.com/macros/s/AKfycbwyxMy9cemujAQh0KwExY4RRSoprYFvsn0xpbxLS7SieqjKWZBoagahJtFPLn3nFXPnhw/exec",
-
-
-  /*
-   * JOUW CHATSONG COMMUNITY
-   */
-  CHATSONG_URL:
-    "https://community.chatsong.nl"
-
-};
-
-</script>
-
-
-<!-- ==================================================
-     HEADER
-================================================== -->
-
-<header class="header">
-
-  <div class="container header-inner">
-
-    <div class="logo">
-      Chatsong <span>MicroFeed</span>
-    </div>
-
-    <div class="header-buttons">
-
-      <a
-        class="btn btn-light"
-        id="headerDiscover"
-        target="_blank">
-        Discover Chatsong
-      </a>
-
-      <a
-        class="btn btn-dark"
-        id="headerJoin"
-        target="_blank">
-        Join Chatsong
-      </a>
-
-    </div>
-
-  </div>
-
-</header>
-
-
-<!-- ==================================================
-     HERO
-================================================== -->
-
-<section class="hero">
-
   <div class="container">
-
-    <h1>
-      Discover music you haven't heard yet.
-    </h1>
-
-    <p>
-      Found an amazing track by an independent or unknown artist?
-      Drop it here and share it with other music lovers.
-      No membership required.
-    </p>
-
-    <div class="hero-buttons">
-
-      <a
-        class="btn btn-primary"
-        href="#share">
-        Share a track
-      </a>
-
-      <a
-        class="btn btn-outline"
-        id="heroDiscover"
-        target="_blank">
-        Discover Chatsong
-      </a>
-
+    <!-- Post Formulier -->
+    <div class="form-card">
+      <h2 style="margin-top:0">Share a Track</h2>
+      <form id="trackForm">
+        <div class="form-group">
+          <label>Artiest</label>
+          <input type="text" id="artist" class="form-control" required placeholder="bijv. ChatsongMusic">
+        </div>
+        <div class="form-group">
+          <label>Titel</label>
+          <input type="text" id="title" class="form-control" required placeholder="bijv. Hope & Desire">
+        </div>
+        <div class="form-group">
+          <label>Muziek URL (Spotify, SoundCloud, YouTube, Apple Music)</label>
+          <input type="url" id="url" class="form-control" required placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Genre / Tag</label>
+          <select id="tag" class="form-control">
+            <option value="Electronic">Electronic</option>
+            <option value="Pop">Pop</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Rock">Rock</option>
+            <option value="Indie">Indie</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">Deel Track</button>
+      </form>
     </div>
 
+    <!-- Feed met Tracks -->
+    <div id="feed">
+      <p style="text-align:center; color: var(--text-muted);">Tracks laden...</p>
+    </div>
   </div>
 
-</section>
-
-
-<main class="container">
-
-
-<!-- ==================================================
-     SHARE TRACK
-================================================== -->
-
-<section class="share-box" id="share">
-
-  <h2>🎵 Share a track</h2>
-
-  <p>
-    Know a great artist that deserves more listeners?
-    Share their music with us.
-  </p>
-
-  <form id="postForm">
-
-    <div class="form-group">
-
-      <label for="artist">
-        Artist
-      </label>
-
-      <input
-        id="artist"
-        required
-        placeholder="Artist name">
-
-    </div>
-
-
-    <div class="form-group">
-
-      <label for="title">
-        Track title
-      </label>
-
-      <input
-        id="title"
-        required
-        placeholder="Song title">
-
-    </div>
-
-
-    <div class="form-group">
-
-      <label for="url">
-        Music link
-      </label>
-
-      <input
-        id="url"
-        type="url"
-        required
-        placeholder="YouTube, Spotify, SoundCloud, Bandcamp or Apple Music link">
-
-    </div>
-
-
-    <div class="form-group">
-
-      <label for="tag">
-        Tag
-      </label>
-
-      <select id="tag">
-
-        <option value="">
-          Select a tag
-        </option>
-
-        <option value="Indie">
-          Indie
-        </option>
-
-        <option value="Rock">
-          Rock
-        </option>
-
-        <option value="Pop">
-          Pop
-        </option>
-
-        <option value="Electronic">
-          Electronic
-        </option>
-
-        <option value="Hip-Hop">
-          Hip-Hop
-        </option>
-
-        <option value="Metal">
-          Metal
-        </option>
-
-        <option value="Alternative">
-          Alternative
-        </option>
-
-        <option value="Other">
-          Other
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <button
-      class="btn share-submit"
-      type="submit">
-
-      Share track
-
-    </button>
-
-  </form>
-
-  <div id="postMessage"></div>
-
-</section>
-
-
-<!-- ==================================================
-     DISCOVERY CTA
-================================================== -->
-
-<section class="discovery">
-
-  <h2>
-    🎶 Want to discover even more?
-  </h2>
-
-  <p>
-    Chatsong is a music community where independent artists
-    and music lovers can discover each other, share music
-    and join the conversation.
-  </p>
-
-  <div class="discovery-buttons">
-
-    <a
-      class="btn btn-light"
-      id="discoverButton"
-      target="_blank">
-
-      Discover Chatsong →
-
-    </a>
-
-    <a
-      class="btn btn-dark"
-      id="joinButton"
-      target="_blank">
-
-      Become a member
-
-    </a>
-
-  </div>
-
-</section>
-
-
-<!-- ==================================================
-     FEED
-================================================== -->
-
-<h2 class="feed-title">
-  Latest discoveries
-</h2>
-
-<div id="feed">
-
-  <div class="loading">
-    Loading music...
-  </div>
-
-</div>
-
-
-</main>
-
-
-<footer>
-
-  Chatsong MicroFeed · Discover independent music
-
-</footer>
-
-
-<script>
-
-/* ==================================================
-   LINKS
-================================================== */
-
-document.getElementById("headerDiscover").href =
-  CONFIG.CHATSONG_URL;
-
-document.getElementById("headerJoin").href =
-  CONFIG.CHATSONG_URL;
-
-document.getElementById("heroDiscover").href =
-  CONFIG.CHATSONG_URL;
-
-document.getElementById("discoverButton").href =
-  CONFIG.CHATSONG_URL;
-
-document.getElementById("joinButton").href =
-  CONFIG.CHATSONG_URL;
-
-
-/* ==================================================
-   LOAD FEED
-================================================== */
-
-async function loadFeed() {
-
-  const feed =
-    document.getElementById("feed");
-
-  if (
-    CONFIG.API_URL.includes("PASTE-")
-  ) {
-
-    feed.innerHTML = `
-      <div class="error">
-        Google Apps Script URL has not been added yet.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        CONFIG.API_URL +
-        "?action=posts"
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        "Network response failed"
-      );
-
-    }
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !data.success
-    ) {
-
-      throw new Error(
-        data.error ||
-        "Could not load feed"
-      );
-
-    }
-
-
-    renderFeed(data.posts || []);
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    feed.innerHTML = `
-      <div class="error">
-        Could not load the MicroFeed.
-        Please try again later.
-      </div>
-    `;
-
-  }
-
-}
-
-
-/* ==================================================
-   RENDER FEED
-================================================== */
-
-function renderFeed(posts) {
-
-  const feed =
-    document.getElementById("feed");
-
-
-  if (!posts.length) {
-
-    feed.innerHTML = `
-      <div class="share-box">
-        No tracks have been shared yet.
-        Be the first to discover something!
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  feed.innerHTML =
-    posts.map(renderPost).join("");
-
-}
-
-
-/* ==================================================
-   RENDER POST
-================================================== */
-
-function renderPost(post) {
-
-  return `
-
-    <article
-      class="post"
-      data-id="${escapeHtml(post.id)}">
-
-      <div class="post-content">
-
-        <div class="post-header">
-
-          <div>
-
-            <div class="artist">
-              ${escapeHtml(post.artist)}
-            </div>
-
-            <div class="title">
-              ${escapeHtml(post.title)}
-            </div>
-
-          </div>
-
-          ${
-            post.tag
-            ? `
-              <div class="tag">
-                ${escapeHtml(post.tag)}
-              </div>
-            `
-            : ""
-          }
-
-        </div>
-
-
-        ${
-          post.created
-          ? `
-            <div class="date">
-              ${formatDate(post.created)}
-            </div>
-          `
-          : ""
-        }
-
-
-        <div class="embed">
-
-          ${createEmbed(post.url)}
-
-        </div>
-
-
-        <div class="discovery" style="margin:20px 0 0;">
-
-          <strong>
-            Discover this artist on Chatsong
-          </strong>
-
-          <p style="margin-bottom:12px;">
-            Find independent artists, discover more
-            music and join the conversation.
-          </p>
-
-          <a
-            class="btn btn-light"
-            href="${CONFIG.CHATSONG_URL}"
-            target="_blank">
-
-            Discover Chatsong →
-
-          </a>
-
-        </div>
-
-      </div>
-
-
-      <div class="comments">
-
-        <h3>
-          Comments
-        </h3>
-
-        <div
-          id="comments-${escapeHtml(post.id)}">
-
-          Loading comments...
-
-        </div>
-
-
-        <form
-          class="comment-form"
-          onsubmit="submitComment(event, '${escapeJs(post.id)}')">
-
-          <input
-            name="name"
-            placeholder="Your name or nickname"
-            required>
-
-          <textarea
-            name="comment"
-            placeholder="Leave a comment..."
-            required></textarea>
-
-          <button
-            class="btn"
-            type="submit">
-
-            Comment
-
-          </button>
-
-        </form>
-
-      </div>
-
-    </article>
-
-  `;
-
-}
-
-
-/* ==================================================
-   EMBED DETECTION
-================================================== */
-
-function createEmbed(url) {
-
-  if (!url) {
-    return "";
-  }
-
-
-  const safeUrl =
-    escapeHtml(url);
-
-
-  /*
-   * YOUTUBE
-   */
-
-  const youtube =
-    url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?/]+)/
-    );
-
-
-  if (youtube) {
-
-    return `
-      <iframe
-        height="315"
-        src="https://www.youtube.com/embed/${encodeURIComponent(youtube[1])}"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-    `;
-
-  }
-
-
-  /*
-   * SPOTIFY
-   */
-
-  if (
-    url.includes("open.spotify.com")
-  ) {
-
-    const spotify =
-      url.match(
-        /open\.spotify\.com\/(track|album|playlist|episode)\/([^?]+)/
-      );
-
-
-    if (spotify) {
-
-      return `
-        <iframe
-          src="https://open.spotify.com/embed/${spotify[1]}/${spotify[2]}"
-          height="152"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy">
-        </iframe>
-      `;
-
-    }
-
-  }
-
-
-  /*
-   * SOUNDCLOUD
-   */
-
-  if (
-    url.includes("soundcloud.com")
-  ) {
-
-    return `
-      <iframe
-        height="166"
-        scrolling="no"
-        allow="autoplay"
-        loading="lazy"
-        src="https://w.soundcloud.com/player/api.html?url=${encodeURIComponent(url)}">
-      </iframe>
-    `;
-
-  }
-
-
-  /*
-   * BANDCAMP
-   *
-   * Bandcamp often requires its own embed
-   * information, so we provide a direct link
-   * rather than generating a potentially broken
-   * iframe.
-   */
-
-  if (
-    url.includes("bandcamp.com")
-  ) {
-
-    return `
-      <a
-        class="external-link"
-        href="${safeUrl}"
-        target="_blank"
-        rel="noopener">
-
-        🎵 Listen on Bandcamp →
-
-      </a>
-    `;
-
-  }
-
-
-  /*
-   * APPLE MUSIC
-   */
-
-  if (
-    url.includes("music.apple.com")
-  ) {
-
-    return `
-      <a
-        class="external-link"
-        href="${safeUrl}"
-        target="_blank"
-        rel="noopener">
-
-        🎵 Listen on Apple Music →
-
-      </a>
-    `;
-
-  }
-
-
-  /*
-   * FALLBACK
-   */
-
-  return `
-    <a
-      class="external-link"
-      href="${safeUrl}"
-      target="_blank"
-      rel="noopener">
-
-      🎵 Open this track →
-
-    </a>
-  `;
-
-}
-
-
-/* ==================================================
-   LOAD COMMENTS
-================================================== */
-
-async function loadComments(trackId) {
-
-  const box =
-    document.getElementById(
-      "comments-" + trackId
-    );
-
-
-  if (!box) {
-    return;
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        CONFIG.API_URL +
-        "?action=comments&trackId=" +
-        encodeURIComponent(trackId)
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !data.success
-    ) {
-
-      throw new Error(
-        data.error ||
-        "Comments could not be loaded"
-      );
-
-    }
-
-
-    renderComments(
-      trackId,
-      data.comments || []
-    );
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    box.innerHTML =
-      `<small>Comments could not be loaded.</small>`;
-
-  }
-
-}
-
-
-/* ==================================================
-   RENDER COMMENTS
-================================================== */
-
-function renderComments(
-  trackId,
-  comments
-) {
-
-  const box =
-    document.getElementById(
-      "comments-" + trackId
-    );
-
-
-  if (!comments.length) {
-
-    box.innerHTML =
-      `<small>No comments yet. Be the first!</small>`;
-
-    return;
-
-  }
-
-
-  box.innerHTML =
-    comments.map(comment => `
-
-      <div class="comment">
-
-        <div class="comment-name">
-          ${escapeHtml(comment.name)}
-        </div>
-
-        <div class="comment-text">
-          ${escapeHtml(comment.comment)}
-        </div>
-
-        <div class="comment-date">
-          ${formatDate(comment.create)}
-        </div>
-
-      </div>
-
-    `).join("");
-
-}
-
-
-/* ==================================================
-   SUBMIT COMMENT
-================================================== */
-
-async function submitComment(
-  event,
-  trackId
-) {
-
-  event.preventDefault();
-
-
-  const form =
-    event.target;
-
-
-  const name =
-    form.name.value.trim();
-
-
-  const comment =
-    form.comment.value.trim();
-
-
-  if (!name || !comment) {
-    return;
-  }
-
-
-  const button =
-    form.querySelector("button");
-
-
-  button.disabled = true;
-
-  button.textContent =
-    "Posting...";
-
-
-  try {
-
-    const response =
-      await fetch(
-        CONFIG.API_URL,
-        {
-          method: "POST",
-
-          body: JSON.stringify({
-
-            action:
-              "createComment",
-
-            "track id":
-              trackId,
-
-            name:
-              name,
-
-            comment:
-              comment
-
-          })
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !data.success
-    ) {
-
-      throw new Error(
-        data.error ||
-        "Comment could not be posted"
-      );
-
-    }
-
-
-    form.reset();
-
-
-    await loadComments(trackId);
-
-
-  } catch (error) {
-
-    alert(
-      "Could not post comment: " +
-      error.message
-    );
-
-  }
-
-
-  button.disabled = false;
-
-  button.textContent =
-    "Comment";
-
-}
-
-
-/* ==================================================
-   DATE
-================================================== */
-
-function formatDate(value) {
-
-  if (!value) {
-    return "";
-  }
-
-
-  const date =
-    new Date(value);
-
-
-  if (
-    isNaN(date.getTime())
-  ) {
-
-    return value;
-
-  }
-
-
-  return date.toLocaleDateString(
-    undefined,
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    }
-  );
-
-}
-
-
-/* ==================================================
-   SECURITY
-================================================== */
-
-function escapeHtml(value) {
-
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-
-function escapeJs(value) {
-
-  return String(value || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'");
-
-}
-
-
-/* ==================================================
-   SHARE TRACK
-================================================== */
-
-document
-  .getElementById("postForm")
-  .addEventListener(
-    "submit",
-    async function(event) {
-
-      event.preventDefault();
-
-
-      const button =
-        this.querySelector(
-          "button"
-        );
-
-
-      const message =
-        document.getElementById(
-          "postMessage"
-        );
-
-
-      const artist =
-        document
-          .getElementById("artist")
-          .value
-          .trim();
-
-
-      const title =
-        document
-          .getElementById("title")
-          .value
-          .trim();
-
-
-      const url =
-        document
-          .getElementById("url")
-          .value
-          .trim();
-
-
-      const tag =
-        document
-          .getElementById("tag")
-          .value;
-
-
-      button.disabled = true;
-
-      button.textContent =
-        "Sharing...";
-
-
-      try {
-
-        const response =
-          await fetch(
-            CONFIG.API_URL,
-            {
-
-              method: "POST",
-
-              body:
-                JSON.stringify({
-
-                  action:
-                    "createPost",
-
-                  artist:
-                    artist,
-
-                  title:
-                    title,
-
-                  url:
-                    url,
-
-                  tag:
-                    tag
-
-                })
-
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (
-          !data.success
-        ) {
-
-          throw new Error(
-            data.error ||
-            "Could not share track"
-          );
-
-        }
-
-
-        message.innerHTML = `
-          <p>
-            🎵 Track shared successfully!
-          </p>
-        `;
-
-
-        this.reset();
-
-
-        await loadFeed();
-
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
-
-      } catch (error) {
-
-        message.innerHTML = `
-          <div class="error">
-            Could not share track:
-            ${escapeHtml(error.message)}
-          </div>
-        `;
-
+  <script>
+    // VOER HIER JOUW APPS SCRIPT WEB APP URL IN:
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwyxMy9cemujAQh0KwExY4RRSoprYFvsn0xpbxLS7SieqjKWZBoagahJtFPLn3nFXPnhw/exec';
+
+    // 1. UNIVERSELE AUDIO PLAYER (Spotify, SoundCloud, YouTube, Apple Music)
+    function getUniversalEmbedUrl(rawUrl) {
+      if (!rawUrl) return null;
+      const url = rawUrl.trim().split('?')[0]; // Strip tracking parameters
+
+      // Spotify
+      if (url.includes('spotify.com')) {
+        return url.replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
 
+      // YouTube & YouTube Music
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtu.be/')) {
+          videoId = url.split('youtu.be/')[1];
+        } else if (url.includes('v=')) {
+          videoId = url.split('v=').slice(1).join('v=').split('&')[0];
+        }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+      }
 
-      button.disabled = false;
+      // Apple Music
+      if (url.includes('music.apple.com')) {
+        return url.replace('music.apple.com', 'embed.music.apple.com');
+      }
 
-      button.textContent =
-        "Share track";
+      // SoundCloud
+      if (url.includes('soundcloud.com')) {
+        return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+      }
 
+      return null;
     }
-  );
 
+    function renderPlayer(url) {
+      const embedUrl = getUniversalEmbedUrl(url);
 
-/* ==================================================
-   LOAD COMMENTS AFTER POSTS ARE RENDERED
-================================================== */
+      if (embedUrl) {
+        let height = '152';
+        if (embedUrl.includes('youtube.com')) height = '315';
+        if (embedUrl.includes('spotify.com')) height = '152';
+        if (embedUrl.includes('soundcloud.com')) height = '166';
 
-const originalRenderFeed =
-  renderFeed;
+        return `
+          <div class="player-container">
+            <iframe src="${embedUrl}" width="100%" height="${height}" frameborder="0" allowtransparency="true" allow="encrypted-media; clipboard-write"></iframe>
+          </div>
+        `;
+      }
 
+      return `
+        <div class="player-container">
+          <a href="${url}" target="_blank" rel="noopener noreferrer" class="external-btn">
+            ▶ listen on platform
+          </a>
+        </div>
+      `;
+    }
 
-/*
- * Kleine wrapper zodat comments
- * na het laden van de feed automatisch
- * worden opgehaald.
- */
+    // 2. MODERNE DEELFUNCTIES (Mobiel + Desktop)
+    async function shareTrack(artist, title, url) {
+      const shareData = {
+        title: `${artist} - ${title}`,
+        text: `Luister naar "${title}" van ${artist} op Chatsong!`,
+        url: url
+      };
 
-renderFeed = function(posts) {
+      // Native Mobiel & Mac/Edge Share
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (err) {
+          if (err.name !== 'AbortError') console.error(err);
+        }
+      }
 
-  originalRenderFeed(posts);
+      // Desktop Fallback -> Klembord
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast('Link gekopieerd naar klembord!');
+      } catch (err) {
+        prompt('Kopieer de link:', url);
+      }
+    }
 
+    function shareToPlatform(platform, artist, title, url) {
+      const text = encodeURIComponent(`Luister naar "${title}" van ${artist} op Chatsong!`);
+      const link = encodeURIComponent(url);
 
-  posts.forEach(post => {
+      if (platform === 'native') {
+        shareTrack(artist, title, url);
+      } else if (platform === 'whatsapp') {
+        window.open(`https://api.whatsapp.com/send?text=${text}%20${link}`, '_blank');
+      } else if (platform === 'twitter') {
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${link}`, '_blank');
+      }
+    }
 
-    loadComments(post.id);
+    function showToast(message) {
+      let toast = document.getElementById('share-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'share-toast';
+        toast.className = 'share-toast';
+        document.body.appendChild(toast);
+      }
+      toast.innerText = message;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
 
-  });
+    // 3. FEED LADEN EN INVOEREN
+    async function loadFeed() {
+      const feedContainer = document.getElementById('feed');
+      try {
+        const res = await fetch(`${GAS_URL}?action=posts`);
+        const data = await res.json();
 
-};
+        if (!data.success || !data.posts) {
+          feedContainer.innerHTML = `<p style="color:red">Fout bij laden: ${data.error || 'Onbekende fout'}</p>`;
+          return;
+        }
 
+        if (data.posts.length === 0) {
+          feedContainer.innerHTML = '<p style="text-align:center">Nog geen tracks gedeeld.</p>';
+          return;
+        }
 
-/* ==================================================
-   START
-================================================== */
+        feedContainer.innerHTML = data.posts.map(post => `
+          <div class="track-card">
+            <div class="track-header">
+              <div>
+                <h3 class="artist-name">${escapeHtml(post.artist)}</h3>
+                <p class="track-title">${escapeHtml(post.title)}</p>
+              </div>
+              ${post.tag ? `<span class="tag-badge">${escapeHtml(post.tag)}</span>` : ''}
+            </div>
+            
+            ${renderPlayer(post.url)}
 
-loadFeed();
+            <div class="action-bar">
+              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                Delen
+              </button>
+              <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+                WhatsApp
+              </button>
+              <button class="action-btn x" onclick="shareToPlatform('twitter', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
+                X
+              </button>
+            </div>
+          </div>
+        `).join('');
 
-</script>
+      } catch (err) {
+        feedContainer.innerHTML = `<p style="color:red">Kan geen verbinding maken met de backend.</p>`;
+      }
+    }
 
+    // Formulieren verzenden naar Google Sheet
+    document.getElementById('trackForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Versturen...';
+
+      const payload = {
+        action: 'createPost',
+        artist: document.getElementById('artist').value,
+        title: document.getElementById('title').value,
+        url: document.getElementById('url').value,
+        tag: document.getElementById('tag').value
+      };
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          e.target.reset();
+          loadFeed();
+        } else {
+          alert('Fout: ' + data.error);
+        }
+      } catch (err) {
+        alert('Er is een fout opgetreden bij het opslaan.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Deel Track';
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function escapeJs(str) {
+      return String(str || '').replace(/'/g, "\\'");
+    }
+
+    // Start direct bij het laden van de pagina
+    loadFeed();
+  </script>
 </body>
 </html>
-```
