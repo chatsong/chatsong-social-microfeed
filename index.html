@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,7 @@
       --text-muted: #a1a1aa;
       --accent: #6366f1;
       --accent-hover: #4f46e5;
+      --danger: #ef4444;
     }
 
     body {
@@ -30,7 +31,7 @@
       max-width: 680px;
     }
 
-    /* Formulier */
+    /* Form Card */
     .form-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -78,7 +79,7 @@
       background: var(--accent-hover);
     }
 
-    /* Track Kaarten */
+    /* Track Card */
     .track-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -106,6 +107,12 @@
       margin: 2px 0 0 0;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .tag-badge {
       background: rgba(99, 102, 241, 0.15);
       color: #818cf8;
@@ -113,6 +120,22 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: var(--danger);
+      color: #fff;
     }
 
     /* Embed Player Container */
@@ -141,7 +164,7 @@
       font-weight: 600;
     }
 
-    /* Deelknoppen */
+    /* Action Bar */
     .action-bar {
       display: flex;
       gap: 8px;
@@ -166,14 +189,78 @@
       transition: background 0.2s;
     }
 
-    .action-btn:hover {
-      background: #3f3f46;
-    }
-
+    .action-btn:hover { background: #3f3f46; }
     .action-btn.wa:hover { background: #059669; }
     .action-btn.x:hover { background: #000; }
 
-    /* Toast melding op desktop */
+    /* Comments Section */
+    .comments-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .comment-item {
+      background: #09090b;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      border: 1px solid var(--border-color);
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .comment-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .comment-text {
+      color: #d4d4d8;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .comment-input-name {
+      width: 30%;
+    }
+
+    .comment-input-text {
+      width: 55%;
+    }
+
+    .btn-comment-submit {
+      width: 15%;
+      background: #27272a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-comment-submit:hover {
+      background: var(--accent);
+    }
+
+    /* Toast Notification */
     .share-toast {
       position: fixed;
       bottom: 24px;
@@ -198,20 +285,20 @@
 <body>
 
   <div class="container">
-    <!-- Post Formulier -->
+    <!-- Share Form -->
     <div class="form-card">
-      <h2 style="margin-top:0">Share a Track</h2>
+      <h2 style="margin-top:0">Share a track</h2>
       <form id="trackForm">
         <div class="form-group">
-          <label>Artiest</label>
-          <input type="text" id="artist" class="form-control" required placeholder="bijv. ChatsongMusic">
+          <label>Artist</label>
+          <input type="text" id="artist" class="form-control" required placeholder="e.g. ChatsongMusic">
         </div>
         <div class="form-group">
-          <label>Titel</label>
-          <input type="text" id="title" class="form-control" required placeholder="bijv. Hope & Desire">
+          <label>Track title</label>
+          <input type="text" id="title" class="form-control" required placeholder="e.g. Hope & Desire">
         </div>
         <div class="form-group">
-          <label>Muziek URL (Spotify, SoundCloud, YouTube, Apple Music)</label>
+          <label>Music link (Spotify, SoundCloud, YouTube, Apple Music)</label>
           <input type="url" id="url" class="form-control" required placeholder="https://...">
         </div>
         <div class="form-group">
@@ -224,31 +311,32 @@
             <option value="Indie">Indie</option>
           </select>
         </div>
-        <button type="submit" class="btn-submit">Deel Track</button>
+        <button type="submit" class="btn-submit">Share track</button>
       </form>
     </div>
 
-    <!-- Feed met Tracks -->
+    <!-- Feed Container -->
     <div id="feed">
-      <p style="text-align:center; color: var(--text-muted);">Tracks laden...</p>
+      <p style="text-align:center; color: var(--text-muted);">Loading tracks...</p>
     </div>
   </div>
 
   <script>
-    // VOER HIER JOUW APPS SCRIPT WEB APP URL IN:
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwyxMy9cemujAQh0KwExY4RRSoprYFvsn0xpbxLS7SieqjKWZBoagahJtFPLn3nFXPnhw/exec';
+    // YOUR GOOGLE APPS SCRIPT WEB APP URL
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8PXQmPdm4Cjazr5_hNIPu1viHmTXczbH_I/exec';
+    
+    // MODERATOR PASSWORD FOR DELETING TRACKS (Change this to whatever you want!)
+    const MODERATOR_PIN = '1234';
 
-    // 1. UNIVERSELE AUDIO PLAYER (Spotify, SoundCloud, YouTube, Apple Music)
+    // 1. UNIVERSAL EMBED PLAYER
     function getUniversalEmbedUrl(rawUrl) {
       if (!rawUrl) return null;
-      const url = rawUrl.trim().split('?')[0]; // Strip tracking parameters
+      const url = rawUrl.trim().split('?')[0];
 
-      // Spotify
       if (url.includes('spotify.com')) {
         return url.replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
 
-      // YouTube & YouTube Music
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
         if (url.includes('youtu.be/')) {
@@ -259,12 +347,10 @@
         return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
       }
 
-      // Apple Music
       if (url.includes('music.apple.com')) {
         return url.replace('music.apple.com', 'embed.music.apple.com');
       }
 
-      // SoundCloud
       if (url.includes('soundcloud.com')) {
         return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
       }
@@ -278,7 +364,6 @@
       if (embedUrl) {
         let height = '152';
         if (embedUrl.includes('youtube.com')) height = '315';
-        if (embedUrl.includes('spotify.com')) height = '152';
         if (embedUrl.includes('soundcloud.com')) height = '166';
 
         return `
@@ -291,21 +376,20 @@
       return `
         <div class="player-container">
           <a href="${url}" target="_blank" rel="noopener noreferrer" class="external-btn">
-            ▶ listen on platform
+            ▶ Play on platform
           </a>
         </div>
       `;
     }
 
-    // 2. MODERNE DEELFUNCTIES (Mobiel + Desktop)
+    // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
       const shareData = {
         title: `${artist} - ${title}`,
-        text: `Luister naar "${title}" van ${artist} op Chatsong!`,
+        text: `Listen to "${title}" by ${artist} on Chatsong!`,
         url: url
       };
 
-      // Native Mobiel & Mac/Edge Share
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         try {
           await navigator.share(shareData);
@@ -315,17 +399,16 @@
         }
       }
 
-      // Desktop Fallback -> Klembord
       try {
         await navigator.clipboard.writeText(url);
-        showToast('Link gekopieerd naar klembord!');
+        showToast('Link copied to clipboard!');
       } catch (err) {
-        prompt('Kopieer de link:', url);
+        prompt('Copy link:', url);
       }
     }
 
     function shareToPlatform(platform, artist, title, url) {
-      const text = encodeURIComponent(`Luister naar "${title}" van ${artist} op Chatsong!`);
+      const text = encodeURIComponent(`Listen to "${title}" by ${artist} on Chatsong!`);
       const link = encodeURIComponent(url);
 
       if (platform === 'native') {
@@ -350,7 +433,7 @@
       setTimeout(() => toast.classList.remove('visible'), 2500);
     }
 
-    // 3. FEED LADEN EN INVOEREN
+    // 3. LOAD FEED & TRACKS
     async function loadFeed() {
       const feedContainer = document.getElementById('feed');
       try {
@@ -358,23 +441,26 @@
         const data = await res.json();
 
         if (!data.success || !data.posts) {
-          feedContainer.innerHTML = `<p style="color:red">Fout bij laden: ${data.error || 'Onbekende fout'}</p>`;
+          feedContainer.innerHTML = `<p style="color:red">Error loading feed: ${data.error || 'Unknown error'}</p>`;
           return;
         }
 
         if (data.posts.length === 0) {
-          feedContainer.innerHTML = '<p style="text-align:center">Nog geen tracks gedeeld.</p>';
+          feedContainer.innerHTML = '<p style="text-align:center">No tracks shared yet.</p>';
           return;
         }
 
         feedContainer.innerHTML = data.posts.map(post => `
-          <div class="track-card">
+          <div class="track-card" id="track-${post.id}">
             <div class="track-header">
               <div>
                 <h3 class="artist-name">${escapeHtml(post.artist)}</h3>
                 <p class="track-title">${escapeHtml(post.title)}</p>
               </div>
-              ${post.tag ? `<span class="tag-badge">${escapeHtml(post.tag)}</span>` : ''}
+              <div class="header-actions">
+                ${post.tag ? `<span class="tag-badge">${escapeHtml(post.tag)}</span>` : ''}
+                <button class="btn-delete" title="Moderator Delete" onclick="deleteTrack('${post.id}')">🗑️ Delete</button>
+              </div>
             </div>
             
             ${renderPlayer(post.url)}
@@ -382,7 +468,7 @@
             <div class="action-bar">
               <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                Delen
+                Share
               </button>
               <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.url)}')">
                 WhatsApp
@@ -391,20 +477,126 @@
                 X
               </button>
             </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+              <div id="comments-list-${post.id}">
+                <p style="font-size:12px; color:var(--text-muted)">Loading comments...</p>
+              </div>
+              <form class="comment-form" onsubmit="submitComment(event, '${post.id}')">
+                <input type="text" class="form-control comment-input-name" placeholder="Name" required>
+                <input type="text" class="form-control comment-input-text" placeholder="Write a comment..." required>
+                <button type="submit" class="btn-comment-submit">Post</button>
+              </form>
+            </div>
           </div>
         `).join('');
 
+        // Load comments for each track
+        data.posts.forEach(post => loadComments(post.id));
+
       } catch (err) {
-        feedContainer.innerHTML = `<p style="color:red">Kan geen verbinding maken met de backend.</p>`;
+        feedContainer.innerHTML = `<p style="color:red">Could not connect to backend.</p>`;
       }
     }
 
-    // Formulieren verzenden naar Google Sheet
+    // 4. COMMENTS LOGIC
+    async function loadComments(trackId) {
+      const container = document.getElementById(`comments-list-${trackId}`);
+      try {
+        const res = await fetch(`${GAS_URL}?action=comments&trackId=${trackId}`);
+        const data = await res.json();
+
+        if (data.success && data.comments) {
+          if (data.comments.length === 0) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--text-muted); margin:4px 0;">No comments yet.</p>';
+            return;
+          }
+
+          container.innerHTML = data.comments.map(c => `
+            <div class="comment-item">
+              <div class="comment-header">
+                <span class="comment-author">${escapeHtml(c.name)}</span>
+              </div>
+              <p class="comment-text">${escapeHtml(c.comment)}</p>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        container.innerHTML = '';
+      }
+    }
+
+    async function submitComment(event, trackId) {
+      event.preventDefault();
+      const form = event.target;
+      const nameInput = form.querySelector('.comment-input-name');
+      const textInput = form.querySelector('.comment-input-text');
+      const submitBtn = form.querySelector('button');
+
+      submitBtn.disabled = true;
+
+      const payload = {
+        action: 'createComment',
+        trackId: trackId,
+        name: nameInput.value,
+        comment: textInput.value
+      };
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          textInput.value = '';
+          loadComments(trackId);
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Could not post comment.');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // 5. MODERATOR DELETE LOGIC
+    async function deleteTrack(trackId) {
+      const pin = prompt('Enter Moderator PIN to delete this track:');
+      if (pin !== MODERATOR_PIN) {
+        if (pin !== null) alert('Incorrect PIN.');
+        return;
+      }
+
+      if (!confirm('Are you sure you want to delete this track?')) return;
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'deletePost', id: trackId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('Track deleted!');
+          loadFeed();
+        } else {
+          alert('Error deleting: ' + data.error);
+        }
+      } catch (err) {
+        alert('Could not delete track.');
+      }
+    }
+
+    // 6. SUBMIT NEW TRACK
     document.getElementById('trackForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector('button');
       submitBtn.disabled = true;
-      submitBtn.innerText = 'Versturen...';
+      submitBtn.innerText = 'Sharing...';
 
       const payload = {
         action: 'createPost',
@@ -425,13 +617,13 @@
           e.target.reset();
           loadFeed();
         } else {
-          alert('Fout: ' + data.error);
+          alert('Error: ' + data.error);
         }
       } catch (err) {
-        alert('Er is een fout opgetreden bij het opslaan.');
+        alert('An error occurred while saving.');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = 'Deel Track';
+        submitBtn.innerText = 'Share track';
       }
     });
 
@@ -443,7 +635,7 @@
       return String(str || '').replace(/'/g, "\\'");
     }
 
-    // Start direct bij het laden van de pagina
+    // Initialize feed
     loadFeed();
   </script>
 </body>
