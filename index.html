@@ -385,12 +385,12 @@
         </div>
         <p class="autofill-hint" id="autofillHint"></p>
         <div class="form-group">
-          <label>Artist</label>
-          <input type="text" id="artist" class="form-control" required placeholder="e.g. ChatsongMusic">
+          <label>Artist (optional)</label>
+          <input type="text" id="artist" class="form-control" placeholder="e.g. ChatsongMusic (auto-fills if blank)">
         </div>
         <div class="form-group">
-          <label>Track title</label>
-          <input type="text" id="title" class="form-control" required placeholder="e.g. Hope & Desire">
+          <label>Track title (optional)</label>
+          <input type="text" id="title" class="form-control" placeholder="e.g. Hope & Desire (auto-fills if blank)">
         </div>
         <div class="form-group">
           <label>Genre / Tag</label>
@@ -416,11 +416,10 @@
     // YOUR GOOGLE APPS SCRIPT WEB APP URL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4d2F9nV1tXHWLhnlkrtddFFvT7ML3RTVQkgYwwNrd-uQfLBk6dED21AAyoyFnRugIfQ/exec';
 
-    // MODERATOR PASSWORD FOR DELETING TRACKS (Change this to whatever you want!)
+    // MODERATOR PASSWORD FOR DELETING TRACKS
     const MODERATOR_PIN = '1234';
 
-    // The forum page where this microfeed is embedded - share links point back here (with a
-    // ?track= deep link) instead of straight to the external music platform.
+    // The forum page where this microfeed is embedded
     const SITE_URL = 'https://community.chatsong.nl/blog';
 
     // 1. UNIVERSAL EMBED PLAYER
@@ -477,9 +476,7 @@
       `;
     }
 
-    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK
-    // Uses noembed.com (no API key needed) to look up metadata so fans only have to paste a
-    // link. Artist/title fields stay editable in case the lookup is wrong or unsupported.
+    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK (Support voor Spotify, SoundCloud & YouTube)
     let autofillRequestId = 0;
 
     async function autofillFromUrl() {
@@ -500,38 +497,56 @@
       hint.className = 'autofill-hint';
 
       try {
-        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`);
+        let fetchUrl = '';
+
+        // Bepaal de juiste oEmbed API per platform
+        if (rawUrl.includes('spotify.com')) {
+          fetchUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(rawUrl)}`;
+        } else if (rawUrl.includes('soundcloud.com')) {
+          fetchUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`;
+        } else {
+          fetchUrl = `https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`;
+        }
+
+        const res = await fetch(fetchUrl);
         const data = await res.json();
 
-        if (requestId !== autofillRequestId) return; // a newer paste happened while this was loading
+        if (requestId !== autofillRequestId) return;
 
         if (data.error) {
-          hint.textContent = "Couldn't auto-fill details — fill in artist and title yourself.";
+          hint.textContent = "Couldn't auto-fill details — feel free to fill them in yourself or leave blank.";
           hint.className = 'autofill-hint error';
           return;
         }
 
-        if (!artistInput.value.trim() && data.author_name) {
-          artistInput.value = data.author_name;
+        let foundArtist = data.author_name || '';
+        let foundTitle = data.title || '';
+
+        // Spotify geeft soms de titel als "Track Title by Artist"
+        if (rawUrl.includes('spotify.com') && !foundArtist && foundTitle.includes(' by ')) {
+          const parts = foundTitle.split(' by ');
+          foundTitle = parts[0];
+          foundArtist = parts[1];
         }
-        if (!titleInput.value.trim() && data.title) {
-          titleInput.value = data.title;
+
+        if (!artistInput.value.trim() && foundArtist) {
+          artistInput.value = foundArtist;
+        }
+        if (!titleInput.value.trim() && foundTitle) {
+          titleInput.value = foundTitle;
         }
 
         hint.textContent = 'Details found — feel free to edit before sharing.';
         hint.className = 'autofill-hint found';
       } catch (err) {
         if (requestId !== autofillRequestId) return;
-        hint.textContent = "Couldn't auto-fill details — fill in artist and title yourself.";
+        hint.textContent = "Couldn't auto-fill details — mag leeg blijven bij het delen.";
         hint.className = 'autofill-hint error';
       }
     }
 
-    document.getElementById('url').addEventListener('paste', () => {
-      // Wait a tick so the pasted value is actually in the input before reading it
-      setTimeout(autofillFromUrl, 50);
-    });
-    document.getElementById('url').addEventListener('blur', autofillFromUrl);
+    document.getElementById('url').addEventListener('input', autofillFromUrl);
+    document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
 
     // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
@@ -653,8 +668,6 @@
       }
     }
 
-    // Scrolls to and briefly highlights a track when the page is opened via a shared
-    // ?track=<id> deep link (e.g. from a WhatsApp or X share).
     function scrollToSharedTrack() {
       const params = new URLSearchParams(window.location.search);
       const trackId = params.get('track');
@@ -672,7 +685,7 @@
     function getVoteState(commentId) {
       try {
         const votes = JSON.parse(localStorage.getItem('chatsong_comment_votes') || '{}');
-        return votes[commentId] || null; // 'up', 'down', or null
+        return votes[commentId] || null;
       } catch (err) {
         return null;
       }
@@ -688,7 +701,7 @@
         }
         localStorage.setItem('chatsong_comment_votes', JSON.stringify(votes));
       } catch (err) {
-        // localStorage unavailable - voting will still work, it just won't be remembered
+        // localStorage unavailable
       }
     }
 
@@ -737,14 +750,10 @@
     async function voteComment(commentId, trackId, direction) {
       const currentState = getVoteState(commentId);
 
-      // Clicking the same direction again removes the vote instead of doubling it
       let effectiveDirection = direction;
       if (currentState === direction) {
-        effectiveDirection = direction === 'up' ? 'down' : 'up'; // cancel out the previous vote
+        effectiveDirection = direction === 'up' ? 'down' : 'up';
         setVoteState(commentId, null);
-      } else if (currentState && currentState !== direction) {
-        // Switching from up to down (or vice versa) counts as two steps
-        setVoteState(commentId, direction);
       } else {
         setVoteState(commentId, direction);
       }
@@ -770,7 +779,7 @@
           }
         }
       } catch (err) {
-        // Silently ignore - the button just won't visually update
+        // Silently ignore
       }
     }
 
@@ -838,18 +847,27 @@
       }
     }
 
-    // 6. SUBMIT NEW TRACK
+    // 6. SUBMIT NEW TRACK (Met automatische fallback voor lege velden)
     document.getElementById('trackForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector('button');
       submitBtn.disabled = true;
       submitBtn.innerText = 'Sharing...';
 
+      const typedArtist = document.getElementById('artist').value.trim();
+      const typedTitle = document.getElementById('title').value.trim();
+      const inputUrl = document.getElementById('url').value;
+
+      // Slimme automatische namen als een veld toch leeg is gelaten
+      const isSpotify = inputUrl.includes('spotify.com');
+      const fallbackArtist = typedArtist || (isSpotify ? 'Spotify Artist' : 'Shared Artist');
+      const fallbackTitle = typedTitle || (isSpotify ? 'Spotify Track' : 'Shared Track');
+
       const payload = {
         action: 'createPost',
-        artist: document.getElementById('artist').value,
-        title: document.getElementById('title').value,
-        url: document.getElementById('url').value,
+        artist: fallbackArtist,
+        title: fallbackTitle,
+        url: inputUrl,
         tag: document.getElementById('tag').value
       };
 
