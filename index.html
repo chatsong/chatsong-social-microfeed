@@ -12,8 +12,10 @@
       --text-main: #f4f4f5;
       --text-muted: #a1a1aa;
       --accent: #6366f1;
+      --accent-light: #818cf8;
       --accent-hover: #4f46e5;
       --danger: #ef4444;
+      --success: #22c55e;
     }
 
     body {
@@ -61,6 +63,11 @@
       color: #fff;
       font-size: 14px;
       box-sizing: border-box;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
     }
 
     .btn-submit {
@@ -200,41 +207,102 @@
       border-top: 1px dashed var(--border-color);
     }
 
+    .comments-heading {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin: 0 0 10px 0;
+    }
+
     .comment-item {
-      background: #09090b;
+      background: #0f0f12;
       padding: 10px 12px;
       border-radius: 8px;
       margin-bottom: 8px;
       font-size: 13px;
       border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent);
     }
 
     .comment-header {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
       margin-bottom: 4px;
     }
 
     .comment-author {
-      font-weight: 600;
-      color: var(--text-main);
+      font-weight: 700;
+      color: var(--accent-light);
     }
 
     .comment-date {
       font-size: 11px;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .comment-text {
-      color: #d4d4d8;
-      margin: 0;
+      color: #e4e4e7;
+      margin: 0 0 8px 0;
       word-break: break-word;
+      line-height: 1.4;
+    }
+
+    .comment-votes {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vote-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 6px;
+      width: 26px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+
+    .vote-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text-main);
+    }
+
+    .vote-btn.up.active {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .vote-btn.down.active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .vote-score {
+      font-weight: 700;
+      font-size: 13px;
+      min-width: 18px;
+      text-align: center;
+      color: var(--text-main);
     }
 
     .comment-form {
       display: flex;
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .comment-input-name {
@@ -247,17 +315,18 @@
 
     .btn-comment-submit {
       width: 15%;
-      background: #27272a;
+      background: var(--accent);
       color: #fff;
       border: none;
       border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .btn-comment-submit:hover {
-      background: var(--accent);
+      background: var(--accent-hover);
     }
 
     /* Toast Notification */
@@ -287,7 +356,7 @@
   <div class="container">
     <!-- Share Form -->
     <div class="form-card">
-      <h2 style="margin-top:0">Share a track</h2>
+      <h2 style="margin-top:0">Share a track as fan</h2>
       <form id="trackForm">
         <div class="form-group">
           <label>Artist</label>
@@ -323,8 +392,8 @@
 
   <script>
     // YOUR GOOGLE APPS SCRIPT WEB APP URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw37JuBB_ff5xl-N8nTNna2sEsnmpOt-5Kfa_JoIac0Kh_g2fQEWHpMi66_GHiMpz8P3w/exec';
-    
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxeFEwlFQ45w4N_NUZum10koCN5PvaxY3xVMYdfnPX2NRuAlzhFX-vRbFP-eO_c-vWhCg/exec';
+
     // MODERATOR PASSWORD FOR DELETING TRACKS (Change this to whatever you want!)
     const MODERATOR_PIN = '1234';
 
@@ -462,7 +531,7 @@
                 <button class="btn-delete" title="Moderator Delete" onclick="deleteTrack('${post.id}')">🗑️ Delete</button>
               </div>
             </div>
-            
+
             ${renderPlayer(post.url)}
 
             <div class="action-bar">
@@ -480,6 +549,7 @@
 
             <!-- Comments Section -->
             <div class="comments-section">
+              <p class="comments-heading">Comments</p>
               <div id="comments-list-${post.id}">
                 <p style="font-size:12px; color:var(--text-muted)">Loading comments...</p>
               </div>
@@ -501,6 +571,36 @@
     }
 
     // 4. COMMENTS LOGIC
+    function getVoteState(commentId) {
+      try {
+        const votes = JSON.parse(localStorage.getItem('chatsong_comment_votes') || '{}');
+        return votes[commentId] || null; // 'up', 'down', or null
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function setVoteState(commentId, direction) {
+      try {
+        const votes = JSON.parse(localStorage.getItem('chatsong_comment_votes') || '{}');
+        if (direction === null) {
+          delete votes[commentId];
+        } else {
+          votes[commentId] = direction;
+        }
+        localStorage.setItem('chatsong_comment_votes', JSON.stringify(votes));
+      } catch (err) {
+        // localStorage unavailable - voting will still work, it just won't be remembered
+      }
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    }
+
     async function loadComments(trackId) {
       const container = document.getElementById(`comments-list-${trackId}`);
       try {
@@ -513,17 +613,66 @@
             return;
           }
 
-          container.innerHTML = data.comments.map(c => `
-            <div class="comment-item">
+          container.innerHTML = data.comments.map(c => {
+            const voteState = getVoteState(c.id);
+            return `
+            <div class="comment-item" id="comment-${c.id}">
               <div class="comment-header">
                 <span class="comment-author">${escapeHtml(c.name)}</span>
+                <span class="comment-date">${formatDate(c.createdAt)}</span>
               </div>
               <p class="comment-text">${escapeHtml(c.comment)}</p>
+              <div class="comment-votes">
+                <button class="vote-btn up ${voteState === 'up' ? 'active' : ''}" onclick="voteComment('${c.id}', '${trackId}', 'up')" title="Upvote">▲</button>
+                <span class="vote-score" id="score-${c.id}">${c.votes || 0}</span>
+                <button class="vote-btn down ${voteState === 'down' ? 'active' : ''}" onclick="voteComment('${c.id}', '${trackId}', 'down')" title="Downvote">▼</button>
+              </div>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
       } catch (err) {
         container.innerHTML = '';
+      }
+    }
+
+    async function voteComment(commentId, trackId, direction) {
+      const currentState = getVoteState(commentId);
+
+      // Clicking the same direction again removes the vote instead of doubling it
+      let effectiveDirection = direction;
+      if (currentState === direction) {
+        effectiveDirection = direction === 'up' ? 'down' : 'up'; // cancel out the previous vote
+        setVoteState(commentId, null);
+      } else if (currentState && currentState !== direction) {
+        // Switching from up to down (or vice versa) counts as two steps
+        setVoteState(commentId, direction);
+      } else {
+        setVoteState(commentId, direction);
+      }
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'voteComment', commentId: commentId, direction: effectiveDirection })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          const scoreEl = document.getElementById(`score-${commentId}`);
+          if (scoreEl) scoreEl.textContent = data.votes;
+
+          const item = document.getElementById(`comment-${commentId}`);
+          if (item) {
+            const upBtn = item.querySelector('.vote-btn.up');
+            const downBtn = item.querySelector('.vote-btn.down');
+            const newState = getVoteState(commentId);
+            upBtn.classList.toggle('active', newState === 'up');
+            downBtn.classList.toggle('active', newState === 'down');
+          }
+        }
+      } catch (err) {
+        // Silently ignore - the button just won't visually update
       }
     }
 
