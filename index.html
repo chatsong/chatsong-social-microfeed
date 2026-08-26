@@ -419,8 +419,9 @@
     // MODERATOR PASSWORD FOR DELETING TRACKS
     const MODERATOR_PIN = '1234';
 
-    // The forum page where this microfeed is embedded
-    const SITE_URL = 'https://community.chatsong.nl/blog';
+    // The forum blog post where this microfeed is embedded - share links point back here (with a
+    // ?track= deep link) instead of straight to the external music platform.
+    const SITE_URL = 'https://community.chatsong.nl/blog/1548-submit-a-hidden-gem';
 // 1. UNIVERSAL EMBED PLAYER (Spotify, YouTube, Shorts, SoundCloud, Apple Music)
     function getUniversalEmbedUrl(rawUrl) {
       if (!rawUrl) return null;
@@ -428,7 +429,9 @@
 
       // 1. Spotify
       if (url.includes('spotify.com')) {
-        return url.split('?')[0].replace('open.spotify.com/', 'open.spotify.com/embed/');
+        // Strip locale segments like /intl-nl/ that break the embed path
+        const clean = url.split('?')[0].replace(/open\.spotify\.com\/intl-[a-z]{2}\//i, 'open.spotify.com/');
+        return clean.replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
 
       // 2. YouTube (Regulier, Shorts, Mobiel, Music, Live & Embed)
@@ -494,7 +497,7 @@
       const artistInput = document.getElementById('artist');
       const titleInput = document.getElementById('title');
       const hint = document.getElementById('autofillHint');
-      const rawUrl = urlInput.value.trim();
+      let rawUrl = urlInput.value.trim();
 
       if (!rawUrl) {
         hint.textContent = '';
@@ -503,6 +506,15 @@
       }
 
       const requestId = ++autofillRequestId;
+
+      if (isLikelyShortLink(rawUrl)) {
+        hint.textContent = 'Resolving short link…';
+        hint.className = 'autofill-hint';
+        rawUrl = await resolveShortLink(rawUrl);
+        if (requestId !== autofillRequestId) return;
+        urlInput.value = rawUrl; // so the resolved, embeddable link is what actually gets submitted
+      }
+
       hint.textContent = 'Looking up track details…';
       hint.className = 'autofill-hint';
 
@@ -558,6 +570,30 @@
 
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
+
+    // 1c. RESOLVE SHORT LINKS (e.g. spotify.link from Spotify's mobile Share button)
+    // These don't contain a recognizable platform domain, so they can't be embedded directly.
+    // Resolving happens server-side via Apps Script, since the browser can't read the redirect
+    // target across origins without CORS support.
+    function isLikelyShortLink(rawUrl) {
+      try {
+        const hostname = new URL(rawUrl).hostname.toLowerCase();
+        return hostname === 'spotify.link' || hostname === 'spoti.fi' || hostname.endsWith('.spotify.link');
+      } catch (err) {
+        return false;
+      }
+    }
+
+    async function resolveShortLink(rawUrl) {
+      try {
+        const res = await fetch(`${GAS_URL}?action=resolveLink&url=${encodeURIComponent(rawUrl)}`);
+        const data = await res.json();
+        if (data.success && data.resolvedUrl) return data.resolvedUrl;
+      } catch (err) {
+        // fall through to returning the original link below
+      }
+      return rawUrl;
+    }
   
     // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
@@ -585,7 +621,7 @@
     }
 
     function shareToPlatform(platform, artist, title, trackId) {
-      const deepLink = `${SITE_URL}?track=${encodeURIComponent(trackId)}`;
+      const deepLink = `${SITE_URL}#track=${encodeURIComponent(trackId)}`;
       const text = encodeURIComponent(`Listen to "${title}" by ${artist} — shared on community.chatsong.nl`);
       const link = encodeURIComponent(deepLink);
 
@@ -632,8 +668,8 @@
           <div class="track-card" id="track-${post.id}">
             <div class="track-header">
               <div>
-                <h3 class="artist-name">${escapeHtml(post.artist)}</h3>
-                <p class="track-title">${escapeHtml(post.title)}</p>
+                <h3 class="artist-name">${escapeHtml(post.artist) || 'Unknown artist'}</h3>
+                <p class="track-title">${escapeHtml(post.title) || 'Untitled track'}</p>
               </div>
               <div class="header-actions">
                 ${post.tag ? `<span class="tag-badge">${escapeHtml(post.tag)}</span>` : ''}
@@ -644,14 +680,14 @@
             ${renderPlayer(post.url)}
 
             <div class="action-bar">
-              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
+              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist || 'Unknown artist')}', '${escapeJs(post.title || 'Untitled track')}', '${escapeJs(post.id)}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                 Share
               </button>
-              <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
+              <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist || 'Unknown artist')}', '${escapeJs(post.title || 'Untitled track')}', '${escapeJs(post.id)}')">
                 WhatsApp
               </button>
-              <button class="action-btn x" onclick="shareToPlatform('twitter', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
+              <button class="action-btn x" onclick="shareToPlatform('twitter', '${escapeJs(post.artist || 'Unknown artist')}', '${escapeJs(post.title || 'Untitled track')}', '${escapeJs(post.id)}')">
                 X
               </button>
             </div>
@@ -867,7 +903,12 @@
 
       const typedArtist = document.getElementById('artist').value.trim();
       const typedTitle = document.getElementById('title').value.trim();
-      const inputUrl = document.getElementById('url').value;
+      let inputUrl = document.getElementById('url').value.trim();
+
+      if (isLikelyShortLink(inputUrl)) {
+        submitBtn.innerText = 'Resolving link…';
+        inputUrl = await resolveShortLink(inputUrl);
+      }
 
       // Slimme automatische namen als een veld toch leeg is gelaten
       const isSpotify = inputUrl.includes('spotify.com');
@@ -894,7 +935,15 @@
           const hint = document.getElementById('autofillHint');
           hint.textContent = '';
           hint.className = 'autofill-hint';
-          loadFeed();
+
+          // Jump straight to the track that was just submitted, right here on this page.
+          await loadFeed();
+          const newTrackEl = document.getElementById(`track-${data.id}`);
+          if (newTrackEl) {
+            newTrackEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            newTrackEl.classList.add('track-highlight');
+            setTimeout(() => newTrackEl.classList.remove('track-highlight'), 2800);
+          }
         } else {
           alert('Error: ' + data.error);
         }
