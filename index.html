@@ -561,12 +561,17 @@
   
     // 2. SHARING FUNCTIONS
     async function shareTrack(artist, title, url) {
+      const shareTitle = `${title} — ${artist}`;
+      const shareText = `"${title}" by ${artist} on Chatsong 🎵`;
+      const fullText = `${shareText}\n${url}`;
+
       const shareData = {
-        title: `${artist} - ${title}`,
-        text: `Listen to "${title}" by ${artist} on Chatsong!`,
+        title: shareTitle,
+        text: shareText,
         url: url
       };
 
+      // Probeer native share (mobiel)
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         try {
           await navigator.share(shareData);
@@ -576,24 +581,28 @@
         }
       }
 
+      // Fallback: kopieer de VOLLE tekst (titel + artiest + link), niet alleen de URL
       try {
-        await navigator.clipboard.writeText(url);
-        showToast('Link copied to clipboard!');
+        await navigator.clipboard.writeText(fullText);
+        showToast('Track info copied to clipboard!');
       } catch (err) {
-        prompt('Copy link:', url);
+        prompt('Copy this to share:', fullText);
       }
     }
 
     function shareToPlatform(platform, artist, title, trackId) {
       const deepLink = `${SITE_URL}?track=${encodeURIComponent(trackId)}`;
-      const text = encodeURIComponent(`Listen to "${title}" by ${artist} — shared on community.chatsong.nl`);
-      const link = encodeURIComponent(deepLink);
+      const shareTitle = `${title} — ${artist}`;
+      const shareBody = `"${title}" by ${artist}`;
 
       if (platform === 'native') {
         shareTrack(artist, title, deepLink);
       } else if (platform === 'whatsapp') {
-        window.open(`https://api.whatsapp.com/send?text=${text}%20${link}`, '_blank');
+        const text = encodeURIComponent(`${shareBody}\n${deepLink}`);
+        window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
       } else if (platform === 'twitter') {
+        const text = encodeURIComponent(shareBody);
+        const link = encodeURIComponent(deepLink);
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${link}`, '_blank');
       }
     }
@@ -610,7 +619,6 @@
       toast.classList.add('visible');
       setTimeout(() => toast.classList.remove('visible'), 2500);
     }
-
     // 3. LOAD FEED & TRACKS
     async function loadFeed() {
       const feedContainer = document.getElementById('feed');
