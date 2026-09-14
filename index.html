@@ -1,9 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Chatsong Microfeed</title>
+  <!-- html2canvas bibliotheek voor het maken van de Story Card afbeeldingen -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg-color: #09090b;
@@ -421,7 +424,8 @@
 
     // The forum page where this microfeed is embedded
     const SITE_URL = 'https://community.chatsong.nl/blog';
-// 1. UNIVERSAL EMBED PLAYER (Spotify, YouTube, Shorts, SoundCloud, Apple Music)
+
+    // 1. UNIVERSAL EMBED PLAYER (Spotify, YouTube, Shorts, SoundCloud, Apple Music)
     function getUniversalEmbedUrl(rawUrl) {
       if (!rawUrl) return null;
       const url = rawUrl.trim();
@@ -486,7 +490,7 @@
       `;
     }
 
-    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK (Spotify, YouTube, SoundCloud, etc.)
+    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK
     let autofillRequestId = 0;
 
     async function autofillFromUrl() {
@@ -509,13 +513,11 @@
       try {
         let fetchUrl = '';
 
-        // Bepaal de juiste oEmbed API per platform
         if (rawUrl.includes('spotify.com')) {
           fetchUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(rawUrl)}`;
         } else if (rawUrl.includes('soundcloud.com')) {
           fetchUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(rawUrl)}&format=json`;
         } else {
-          // Gebruik noembed voor YouTube, Apple Music en overige platformen
           fetchUrl = `https://noembed.com/embed?url=${encodeURIComponent(rawUrl)}`;
         }
 
@@ -533,7 +535,6 @@
         let foundArtist = data.author_name || '';
         let foundTitle = data.title || '';
 
-        // Spotify geeft soms de titel als "Track Title by Artist"
         if (rawUrl.includes('spotify.com') && !foundArtist && foundTitle.includes(' by ')) {
           const parts = foundTitle.split(' by ');
           foundTitle = parts[0];
@@ -559,45 +560,44 @@
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
   
-    // 2. SHARING FUNCTIONS
-    async function shareTrack(artist, title, url) {
-      const shareTitle = `${title} — ${artist}`;
-      const shareText = `"${title}" by ${artist} on Chatsong 🎵`;
-      const fullText = `${shareText}\n${url}`;
+    // 2. STORY CARD DOWNLOAD & PLATFORM SHARING
+    async function downloadTrackCard(trackId) {
+      const cardEl = document.getElementById(`track-${trackId}`);
+      if (!cardEl) return;
 
-      const shareData = {
-        title: shareTitle,
-        text: shareText,
-        url: url
-      };
+      showToast('Story Card genereren...');
 
-      // Probeer native share (mobiel)
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        try {
-          await navigator.share(shareData);
-          return;
-        } catch (err) {
-          if (err.name !== 'AbortError') console.error(err);
-        }
-      }
-
-      // Fallback: kopieer de VOLLE tekst (titel + artiest + link), niet alleen de URL
       try {
-        await navigator.clipboard.writeText(fullText);
-        showToast('Track info copied to clipboard!');
+        const canvas = await html2canvas(cardEl, {
+          backgroundColor: '#18181b',
+          scale: 2,
+          useCORS: true,
+          ignoreElements: (element) => {
+            // Verberg de delete-knop en comment formulier zodat de afbeelding mooi strak blijft voor social media
+            return element.classList.contains('btn-delete') || element.classList.contains('comment-form');
+          }
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = image;
+        a.download = `chatsong-${trackId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast('Story Card gedownload! 📸');
       } catch (err) {
-        prompt('Copy this to share:', fullText);
+        console.error(err);
+        alert('Kon geen afbeelding maken.');
       }
     }
 
     function shareToPlatform(platform, artist, title, trackId) {
       const deepLink = `${SITE_URL}?track=${encodeURIComponent(trackId)}`;
-      const shareTitle = `${title} — ${artist}`;
       const shareBody = `"${title}" by ${artist}`;
 
-      if (platform === 'native') {
-        shareTrack(artist, title, deepLink);
-      } else if (platform === 'whatsapp') {
+      if (platform === 'whatsapp') {
         const text = encodeURIComponent(`${shareBody}\n${deepLink}`);
         window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
       } else if (platform === 'twitter') {
@@ -619,6 +619,7 @@
       toast.classList.add('visible');
       setTimeout(() => toast.classList.remove('visible'), 2500);
     }
+
     // 3. LOAD FEED & TRACKS
     async function loadFeed() {
       const feedContainer = document.getElementById('feed');
@@ -652,9 +653,8 @@
             ${renderPlayer(post.url)}
 
             <div class="action-bar">
-              <button class="action-btn" onclick="shareToPlatform('native', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                Share
+              <button class="action-btn" onclick="downloadTrackCard('${post.id}')" title="Download als afbeelding voor Instagram Story of Threads">
+                📷 Story Card
               </button>
               <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
                 WhatsApp
@@ -866,7 +866,7 @@
       }
     }
 
-    // 6. SUBMIT NEW TRACK (Met automatische fallback voor lege velden)
+    // 6. SUBMIT NEW TRACK
     document.getElementById('trackForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector('button');
@@ -877,7 +877,6 @@
       const typedTitle = document.getElementById('title').value.trim();
       const inputUrl = document.getElementById('url').value;
 
-      // Slimme automatische namen als een veld toch leeg is gelaten
       const isSpotify = inputUrl.includes('spotify.com');
       const fallbackArtist = typedArtist || (isSpotify ? 'Spotify Artist' : 'Shared Artist');
       const fallbackTitle = typedTitle || (isSpotify ? 'Spotify Track' : 'Shared Track');
