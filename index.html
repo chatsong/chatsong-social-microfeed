@@ -421,7 +421,7 @@
     // MODERATOR PASSWORD FOR DELETING TRACKS
     const MODERATOR_PIN = '1234';
 
-    // SITE URL MET DE GEVRAAGDE BLOGPAGINA
+    // SITE URL VOOR DEEPLINKS
     const SITE_URL = 'https://chatsong.nl/blog/1548-submit-a-hidden-gem';
 
     // UNIVERSAL EMBED PLAYER
@@ -454,6 +454,49 @@
       if (url.includes('soundcloud.com')) {
         const cleanUrl = url.split('?')[0];
         return `https://w.soundcloud.com/player/?url=${encodeURIComponent(cleanUrl)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+      }
+
+      return null;
+    }
+
+    // UNIVERSELE THUMBNAIL EXTRACTOR (YouTube, Spotify, SoundCloud) VOOR STORY CARD
+    async function fetchThumbnailForStory(rawUrl) {
+      if (!rawUrl) return null;
+      const url = rawUrl.trim();
+
+      // 1. YouTube Thumbnail direct genereren via Video ID
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtu.be/')) {
+          videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('/shorts/')) {
+          videoId = url.split('/shorts/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('/embed/')) {
+          videoId = url.split('/embed/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('v=')) {
+          videoId = url.split('v=')[1].split('&')[0];
+        }
+        return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+      }
+
+      // 2. Spotify & SoundCloud via oEmbed ophalen
+      try {
+        let fetchUrl = '';
+        if (url.includes('spotify.com')) {
+          fetchUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`;
+        } else if (url.includes('soundcloud.com')) {
+          fetchUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+        }
+
+        if (fetchUrl) {
+          const res = await fetch(fetchUrl);
+          const data = await res.json();
+          if (data && data.thumbnail_url) {
+            return data.thumbnail_url;
+          }
+        }
+      } catch (err) {
+        console.warn('Kon oEmbed thumbnail niet ophalen:', err);
       }
 
       return null;
@@ -548,12 +591,17 @@
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
   
-    // STORY CARD DOWNLOAD (Inclusief de specifieke bloglink en track ID in de afbeelding)
+    // STORY CARD DOWNLOAD (Nu met universele thumbnail-afbeelding voor alle platformen!)
     async function downloadTrackCard(trackId) {
       const cardEl = document.getElementById(`track-${trackId}`);
       if (!cardEl) return;
 
+      const postUrl = cardEl.getAttribute('data-url');
+      
       showToast('Story Card genereren...');
+
+      // Haal dynamisch de juiste thumbnail op (YouTube, Spotify of SoundCloud)
+      const thumbUrl = await fetchThumbnailForStory(postUrl);
 
       try {
         const canvas = await html2canvas(cardEl, {
@@ -563,7 +611,7 @@
           onclone: (clonedDoc) => {
             const clonedCard = clonedDoc.getElementById(`track-${trackId}`);
             if (clonedCard) {
-              // Verwijder extra knoppen/comments zodat het een schone story wordt
+              // Verwijder extra knoppen/comments voor een schone story lay-out
               const deleteBtn = clonedCard.querySelector('.btn-delete');
               if (deleteBtn) deleteBtn.remove();
               const commentsSec = clonedCard.querySelector('.comments-section');
@@ -571,15 +619,21 @@
               const actionBar = clonedCard.querySelector('.action-bar');
               if (actionBar) actionBar.remove();
 
-              // Vervang de iframe netjes door een vette visuele banner mét jouw bloglink en track ID
+              // Vervang de iframe door een mooie preview met de echte thumbnail en jouw bloglink
               const playerContainer = clonedCard.querySelector('.player-container');
               if (playerContainer) {
                 playerContainer.innerHTML = `
-                  <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 30px 20px; text-align: center; border-radius: 8px; color: white;">
-                    <div style="font-size: 36px; margin-bottom: 8px;">🎵</div>
-                    <div style="font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">SUBMIT A HIDDEN GEM</div>
-                    <div style="font-size: 12px; opacity: 0.95; margin-top: 8px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; display: inline-block; word-break: break-all;">
-                      chatsong.nl/blog/1548-submit-a-hidden-gem?track=${trackId}
+                  <div style="background: #000; border-radius: 8px; overflow: hidden; text-align: center;">
+                    ${thumbUrl ? `<img src="${thumbUrl}" crossorigin="anonymous" style="width: 100%; height: 180px; object-fit: cover; display: block;" />` : `
+                      <div style="height: 140px; background: #27272a; display: flex; align-items: center; justify-content: center; color: #a1a1aa; font-weight: 600; font-size: 16px;">
+                        🎵 Chatsong Microfeed
+                      </div>
+                    `}
+                    <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 14px; color: white;">
+                      <div style="font-weight: 800; font-size: 13px; letter-spacing: 0.5px; margin-bottom: 4px;">SUBMIT A HIDDEN GEM</div>
+                      <div style="font-size: 11px; opacity: 0.95; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block; word-break: break-all;">
+                        chatsong.nl/blog/1548-submit-a-hidden-gem?track=${trackId}
+                      </div>
                     </div>
                   </div>
                 `;
@@ -596,7 +650,7 @@
         a.click();
         document.body.removeChild(a);
 
-        showToast('Story Card gedownload! 📸');
+        showToast('Story Card gedownload met thumbnail! 📸');
       } catch (err) {
         console.error(err);
         alert('Kon geen afbeelding maken.');
@@ -648,7 +702,7 @@
         }
 
         feedContainer.innerHTML = data.posts.map(post => `
-          <div class="track-card" id="track-${post.id}">
+          <div class="track-card" id="track-${post.id}" data-url="${escapeHtml(post.url)}">
             <div class="track-header">
               <div>
                 <h3 class="artist-name">${escapeHtml(post.artist)}</h3>
@@ -663,7 +717,7 @@
             ${renderPlayer(post.url)}
 
             <div class="action-bar">
-              <button class="action-btn" onclick="downloadTrackCard('${post.id}')" title="Download als afbeelding voor Instagram Story of Threads">
+              <button class="action-btn" onclick="downloadTrackCard('${post.id}')" title="Download als afbeelding met thumbnail voor Instagram Story of Threads">
                 📷 Story Card
               </button>
               <button class="action-btn wa" onclick="shareToPlatform('whatsapp', '${escapeJs(post.artist)}', '${escapeJs(post.title)}', '${escapeJs(post.id)}')">
