@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -416,29 +415,26 @@
   </div>
 
   <script>
-    // YOUR GOOGLE APPS SCRIPT WEB APP URL
+    // GOOGLE APPS SCRIPT WEB APP URL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4d2F9nV1tXHWLhnlkrtddFFvT7ML3RTVQkgYwwNrd-uQfLBk6dED21AAyoyFnRugIfQ/exec';
 
     // MODERATOR PASSWORD FOR DELETING TRACKS
     const MODERATOR_PIN = '1234';
 
-    // The forum page where this microfeed is embedded
-    const SITE_URL = 'https://community.chatsong.nl/blog';
+    // SITE URL MET DE GEVRAAGDE BLOGPAGINA
+    const SITE_URL = 'https://chatsong.nl/blog/1548-submit-a-hidden-gem';
 
-    // 1. UNIVERSAL EMBED PLAYER (Spotify, YouTube, Shorts, SoundCloud, Apple Music)
+    // UNIVERSAL EMBED PLAYER
     function getUniversalEmbedUrl(rawUrl) {
       if (!rawUrl) return null;
       const url = rawUrl.trim();
 
-      // 1. Spotify
       if (url.includes('spotify.com')) {
         return url.split('?')[0].replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
 
-      // 2. YouTube (Regulier, Shorts, Mobiel, Music, Live & Embed)
       if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
-
         if (url.includes('youtu.be/')) {
           videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
         } else if (url.includes('/shorts/')) {
@@ -448,16 +444,13 @@
         } else if (url.includes('v=')) {
           videoId = url.split('v=')[1].split('&')[0];
         }
-
         return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
       }
 
-      // 3. Apple Music
       if (url.includes('music.apple.com')) {
         return url.split('?')[0].replace('music.apple.com', 'embed.music.apple.com');
       }
 
-      // 4. SoundCloud
       if (url.includes('soundcloud.com')) {
         const cleanUrl = url.split('?')[0];
         return `https://w.soundcloud.com/player/?url=${encodeURIComponent(cleanUrl)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
@@ -490,7 +483,7 @@
       `;
     }
 
-    // 1b. AUTO-FILL ARTIST/TITLE FROM THE PASTED LINK
+    // AUTO-FILL
     let autofillRequestId = 0;
 
     async function autofillFromUrl() {
@@ -512,7 +505,6 @@
 
       try {
         let fetchUrl = '';
-
         if (rawUrl.includes('spotify.com')) {
           fetchUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(rawUrl)}`;
         } else if (rawUrl.includes('soundcloud.com')) {
@@ -527,7 +519,7 @@
         if (requestId !== autofillRequestId) return;
 
         if (data.error) {
-          hint.textContent = "Couldn't auto-fill details — feel free to fill them in yourself or leave blank.";
+          hint.textContent = "Couldn't auto-fill details — feel free to fill them in yourself.";
           hint.className = 'autofill-hint error';
           return;
         }
@@ -541,18 +533,14 @@
           foundArtist = parts[1];
         }
 
-        if (!artistInput.value.trim() && foundArtist) {
-          artistInput.value = foundArtist;
-        }
-        if (!titleInput.value.trim() && foundTitle) {
-          titleInput.value = foundTitle;
-        }
+        if (!artistInput.value.trim() && foundArtist) artistInput.value = foundArtist;
+        if (!titleInput.value.trim() && foundTitle) titleInput.value = foundTitle;
 
         hint.textContent = 'Details found — feel free to edit before sharing.';
         hint.className = 'autofill-hint found';
       } catch (err) {
         if (requestId !== autofillRequestId) return;
-        hint.textContent = "Couldn't auto-fill details — mag leeg blijven bij het delen.";
+        hint.textContent = "Couldn't auto-fill details.";
         hint.className = 'autofill-hint error';
       }
     }
@@ -560,7 +548,7 @@
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
   
-    // 2. STORY CARD DOWNLOAD & PLATFORM SHARING
+    // STORY CARD DOWNLOAD (Inclusief de specifieke bloglink en track ID in de afbeelding)
     async function downloadTrackCard(trackId) {
       const cardEl = document.getElementById(`track-${trackId}`);
       if (!cardEl) return;
@@ -572,16 +560,38 @@
           backgroundColor: '#18181b',
           scale: 2,
           useCORS: true,
-          ignoreElements: (element) => {
-            // Verberg de delete-knop en comment formulier zodat de afbeelding mooi strak blijft voor social media
-            return element.classList.contains('btn-delete') || element.classList.contains('comment-form');
+          onclone: (clonedDoc) => {
+            const clonedCard = clonedDoc.getElementById(`track-${trackId}`);
+            if (clonedCard) {
+              // Verwijder extra knoppen/comments zodat het een schone story wordt
+              const deleteBtn = clonedCard.querySelector('.btn-delete');
+              if (deleteBtn) deleteBtn.remove();
+              const commentsSec = clonedCard.querySelector('.comments-section');
+              if (commentsSec) commentsSec.remove();
+              const actionBar = clonedCard.querySelector('.action-bar');
+              if (actionBar) actionBar.remove();
+
+              // Vervang de iframe netjes door een vette visuele banner mét jouw bloglink en track ID
+              const playerContainer = clonedCard.querySelector('.player-container');
+              if (playerContainer) {
+                playerContainer.innerHTML = `
+                  <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 30px 20px; text-align: center; border-radius: 8px; color: white;">
+                    <div style="font-size: 36px; margin-bottom: 8px;">🎵</div>
+                    <div style="font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">SUBMIT A HIDDEN GEM</div>
+                    <div style="font-size: 12px; opacity: 0.95; margin-top: 8px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; display: inline-block; word-break: break-all;">
+                      chatsong.nl/blog/1548-submit-a-hidden-gem?track=${trackId}
+                    </div>
+                  </div>
+                `;
+              }
+            }
           }
         });
 
         const image = canvas.toDataURL('image/png');
         const a = document.createElement('a');
         a.href = image;
-        a.download = `chatsong-${trackId}.png`;
+        a.download = `chatsong-gem-${trackId}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -620,7 +630,7 @@
       setTimeout(() => toast.classList.remove('visible'), 2500);
     }
 
-    // 3. LOAD FEED & TRACKS
+    // LOAD FEED
     async function loadFeed() {
       const feedContainer = document.getElementById('feed');
       try {
@@ -679,7 +689,6 @@
           </div>
         `).join('');
 
-        // Load comments for each track
         data.posts.forEach(post => loadComments(post.id));
 
       } catch (err) {
@@ -700,7 +709,7 @@
       setTimeout(() => el.classList.remove('track-highlight'), 2800);
     }
 
-    // 4. COMMENTS LOGIC
+    // COMMENTS LOGIC
     function getVoteState(commentId) {
       try {
         const votes = JSON.parse(localStorage.getItem('chatsong_comment_votes') || '{}');
@@ -719,9 +728,7 @@
           votes[commentId] = direction;
         }
         localStorage.setItem('chatsong_comment_votes', JSON.stringify(votes));
-      } catch (err) {
-        // localStorage unavailable
-      }
+      } catch (err) {}
     }
 
     function formatDate(iso) {
@@ -768,7 +775,6 @@
 
     async function voteComment(commentId, trackId, direction) {
       const currentState = getVoteState(commentId);
-
       let effectiveDirection = direction;
       if (currentState === direction) {
         effectiveDirection = direction === 'up' ? 'down' : 'up';
@@ -797,9 +803,7 @@
             downBtn.classList.toggle('active', newState === 'down');
           }
         }
-      } catch (err) {
-        // Silently ignore
-      }
+      } catch (err) {}
     }
 
     async function submitComment(event, trackId) {
@@ -838,7 +842,6 @@
       }
     }
 
-    // 5. MODERATOR DELETE LOGIC
     async function deleteTrack(trackId) {
       const pin = prompt('Enter Moderator PIN to delete this track:');
       if (pin !== MODERATOR_PIN) {
@@ -866,7 +869,6 @@
       }
     }
 
-    // 6. SUBMIT NEW TRACK
     document.getElementById('trackForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector('button');
@@ -921,7 +923,6 @@
       return String(str || '').replace(/'/g, "\\'");
     }
 
-    // Initialize feed
     loadFeed().then(scrollToSharedTrack);
   </script>
 </body>
