@@ -589,75 +589,86 @@
     document.getElementById('url').addEventListener('input', autofillFromUrl);
     document.getElementById('url').addEventListener('paste', () => setTimeout(autofillFromUrl, 50));
   
-    // STORY CARD DOWNLOAD (Inclusief jouw eigen logo-afbeelding!)
-async function downloadTrackCard(trackId) {
-  const cardEl = document.getElementById(`track-${trackId}`);
-  if (!cardEl) return;
+    // STORY CARD DOWNLOAD (Inclusief Chatsong koptelefoon-logo en gradient huisstijl!)
+    async function downloadTrackCard(trackId) {
+      const cardEl = document.getElementById(`track-${trackId}`);
+      if (!cardEl) return;
 
-  const postUrl = cardEl.getAttribute('data-url');
-  const artistName = cardEl.querySelector('.artist-name')?.textContent || 'Artist';
-  const trackTitle = cardEl.querySelector('.track-title')?.textContent || 'Track';
-  
-  showToast('Story Card genereren...');
+      const postUrl = cardEl.getAttribute('data-url');
+      const artistName = cardEl.querySelector('.artist-name')?.textContent || 'Artist';
+      const trackTitle = cardEl.querySelector('.track-title')?.textContent || 'Track';
+      
+      showToast('Story Card genereren...');
 
-  const thumbUrl = await fetchThumbnailForStory(postUrl);
+      const thumbUrl = await fetchThumbnailForStory(postUrl);
 
-  try {
-    const canvas = await html2canvas(cardEl, {
-      backgroundColor: '#18181b',
-      scale: 2,
-      useCORS: true,
-      onclone: (clonedDoc) => {
-        const clonedCard = clonedDoc.getElementById(`track-${trackId}`);
-        if (clonedCard) {
-          const deleteBtn = clonedCard.querySelector('.btn-delete');
-          if (deleteBtn) deleteBtn.remove();
-          const commentsSec = clonedCard.querySelector('.comments-section');
-          if (commentsSec) commentsSec.remove();
-          const actionBar = clonedCard.querySelector('.action-bar');
-          if (actionBar) actionBar.remove();
+      try {
+        const canvas = await html2canvas(cardEl, {
+          backgroundColor: '#18181b',
+          scale: 2,
+          useCORS: true,
+          onclone: (clonedDoc) => {
+            const clonedCard = clonedDoc.getElementById(`track-${trackId}`);
+            if (clonedCard) {
+              const deleteBtn = clonedCard.querySelector('.btn-delete');
+              if (deleteBtn) deleteBtn.remove();
+              const commentsSec = clonedCard.querySelector('.comments-section');
+              if (commentsSec) commentsSec.remove();
+              const actionBar = clonedCard.querySelector('.action-bar');
+              if (actionBar) actionBar.remove();
 
-          const playerContainer = clonedCard.querySelector('.player-container');
-          if (playerContainer) {
-            playerContainer.innerHTML = `
-              <div style="background: #000; border-radius: 8px; overflow: hidden; text-align: center;">
-                ${thumbUrl ? `<img src="${thumbUrl}" crossorigin="anonymous" style="width: 100%; height: 180px; object-fit: cover; display: block;" />` : `
-                  <div style="background: linear-gradient(135deg, #3b0764 0%, #6b21a8 50%, #9d174d 100%); padding: 22px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-bottom: 1px solid #27272a;">
-                    
-                    <!-- JOUW LOGO AFBEELDING -->
-                    <img src="data:image/webp;base64,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" crossorigin="anonymous" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid rgba(255,255,255,0.3);" />
-
-                    <div style="font-size: 14px; font-weight: 700; color: #ffffff; margin-bottom: 4px;">Listen to ${escapeHtml(artistName)} - ${escapeHtml(trackTitle)}</div>
-                    <div style="font-size: 11px; color: #e4e4e7; line-height: 1.3; opacity: 0.9;">Go to the Chatsong blog called 'Submit Hidden Gem' to see and listen to more!</div>
+              const playerContainer = clonedCard.querySelector('.player-container');
+              if (playerContainer) {
+                playerContainer.innerHTML = `
+                  <div style="background: #000; border-radius: 8px; overflow: hidden; text-align: center;">
+                    ${thumbUrl ? `<img src="${thumbUrl}" crossorigin="anonymous" style="width: 100%; height: 180px; object-fit: cover; display: block;" />` : `
+                      <div style="background: linear-gradient(135deg, #3b0764 0%, #6b21a8 50%, #9d174d 100%); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-bottom: 1px solid #27272a;">
+                        <div style="margin-bottom: 8px; display: flex; align-items: center; justify-content: center;">
+                          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <defs>
+                              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#22d3ee" />
+                                <stop offset="50%" stop-color="#c084fc" />
+                                <stop offset="100%" stop-color="#f43f5e" />
+                              </linearGradient>
+                            </defs>
+                            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            <path d="M9 12v2m3-4v6m3-8v4"></path>
+                          </svg>
+                        </div>
+                        <div style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: #e879f9; margin-bottom: 4px; text-transform: uppercase;">CHATSONG • For indie artists</div>
+                        <div style="font-size: 14px; font-weight: 700; color: #ffffff; margin-bottom: 4px;">Listen to ${escapeHtml(artistName)} - ${escapeHtml(trackTitle)}</div>
+                        <div style="font-size: 11px; color: #e4e4e7; line-height: 1.3; opacity: 0.9;">and more hidden gems by scrolling the submitted tracks!</div>
+                      </div>
+                    `}
+                    <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 14px; color: white;">
+                      <div style="font-weight: 800; font-size: 13px; letter-spacing: 0.5px; margin-bottom: 4px;">CHATSONG MICROFEED</div>
+                      <div style="font-size: 11px; opacity: 0.95; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block; word-break: break-all;">
+                        chatsong.nl/blog/1548-submit-a-hidden-gem?track=${trackId}
+                      </div>
+                    </div>
                   </div>
-                `}
-                <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 14px; color: white;">
-                  <div style="font-weight: 800; font-size: 13px; letter-spacing: 0.5px; margin-bottom: 4px;">CHATSONG MICROFEED</div>
-                  <div style="font-size: 11px; opacity: 0.95; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block; word-break: break-all;">
-                    chatsong.nl/blog/1548-submit-a-hidden-gem?track=${trackId}
-                  </div>
-                </div>
-              </div>
-            `;
+                `;
+              }
+            }
           }
-        }
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = image;
+        a.download = `chatsong-gem-${trackId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast('Story Card met Chatsong logo gedownload! 🎧✨');
+      } catch (err) {
+        console.error(err);
+        alert('Kon geen afbeelding maken.');
       }
-    });
-
-    const image = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = image;
-    a.download = `chatsong-gem-${trackId}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    showToast('Story Card gedownload! 📸✨');
-  } catch (err) {
-    console.error(err);
-    alert('Kon geen afbeelding maken.');
-  }
-}
+    }
 
     function shareToPlatform(platform, artist, title, trackId) {
       const deepLink = `${SITE_URL}?track=${encodeURIComponent(trackId)}`;
